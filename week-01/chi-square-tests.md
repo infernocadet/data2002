@@ -39,3 +39,66 @@ if the p-value is small, then either the null hypothesis is true and the poor ag
 a large p-value does not mean there is evidence the null hypothesis is true.
 
 the **level of significance**, $\alpha$, is the strength of evidence needed to reject the null hypothesis. it is often 0.05.
+
+## test statistic calculated
+
+lets say we are expecting 100 of the _AB, aB, Ab, & ab_ species each. if we get results which slightly differ, we can take the average of the difference. e.g. if AB have 84, the difference is -16, if ab had 123, the difference is 23. and so we could take the average. however negative and positive differences would cancel each other out. so we take the **squared difference**.
+
+we square the difference, and _normalise_ it by dividing by the expected cell counts.
+
+$$\sum_{i=1}^{k}\frac{(y_{i}-e_{i})^{2}}{e_{i}}$$
+
+where $k$ is the number of categories / groups.
+
+we can easily do this in rstudio using math.
+
+## simulate
+
+to see if a test statistic is consistent with the null hypothesis, we want to see the distribution of the test statistic, if the null was true.
+
+we can run a simulation in r, fixing a sample size, assuming the null hypothesis was true.
+
+```r
+n = 400
+phenotype = c("AB", "Ab", "aB", "ab")
+no_link_p = c(1, 1, 1, 1)/4
+e = n * no_link_p
+set.seed(1)
+sim1 = sample(
+  x = phenotype,
+  size = n,
+  replace = TRUE,
+  prob = no_link_p
+)
+```
+
+if we calculated the test statistic ((y-e)^2 / e), it may be smaller or larger than our first data set. however it is important to run these tests multiple times.
+
+```r
+B = 3000
+sim_t_stats = vector(mode = "numeric", length = B)
+for (i in 1:B) {
+  sim = sample(x = phenotype, size = n, replace = TRUE, prob = no_link_p)
+  sim_y = table(sim)
+  sim_t_stats[i] = sum((sim_y - e)^2/e)
+}
+hist(sim_t_stats, main = "", breaks = 20)
+```
+
+now we can visualise the distribution of the test statistic, if the null hypothesis was true. we can compare the test statistic we calculated to the **null distribution**.
+
+> [!TIP]
+> Given that the null hypothesis is true, how likely is it that we observe a test statistic as or more extreme than that we calculated from our original sample?
+
+we can calculate that in r:
+
+```r
+sum(sim_t_stats >= t0)/B
+# or, we can use mean(sim_t_stats >= t0)
+```
+
+if this gave us 0.001, this means that 0.1% of samples when the null hypothesis is true, was more extreme than our original sample. what does this tell us about the agreement between the null hypothesis and our sample of data?
+
+## chi squared
+
+there is a way to look at the distribution of the test statistic without having to run simulations. we can use a $\chi^{2}$ test.
