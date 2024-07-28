@@ -102,3 +102,26 @@ if this gave us 0.001, this means that 0.1% of samples when the null hypothesis 
 ## chi squared
 
 there is a way to look at the distribution of the test statistic without having to run simulations. we can use a $\chi^{2}$ test.
+
+in this example, the test statistic:
+
+$$T=\sum_{i=1}^{k}\frac{(y_{i}-e_{i})^{2}}{e_{i}}~\chi^{2}_{k-1}$$
+
+where $k$ is the number of groups, referred to as **degrees of freedom**.
+
+we can add in our curve on top of the histogram we already have:
+
+```r
+curve(dchisq(x, df = 3), add= TRUE,
+  col = "blue", lwd = 2)
+```
+
+here, we have 3 degrees of freedom, because we had four groups (phenotypes) and we subtract one.
+
+## $\chi^{2}$ test degrees of freedom
+
+in general, the test statistic takes the form:
+
+$$T=\sum_{i=1}^{k}\frac{(y_{i}-e_{i})^{2}}{e_{i}}~\chi^{2}_{k-1-q} \text{  (approximately)}$$
+
+where, $q$ is the number of parameters that need to be estimated from the sample.
