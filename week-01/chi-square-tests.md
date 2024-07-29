@@ -124,4 +124,29 @@ in general, the test statistic takes the form:
 
 $$T=\sum_{i=1}^{k}\frac{(y_{i}-e_{i})^{2}}{e_{i}}~\chi^{2}_{k-1-q} \text{  (approximately)}$$
 
-where, $q$ is the number of parameters that need to be estimated from the sample.
+where, $q$ is the number of parameters that need to be estimated from the sample. we lose a degree of freedom for each parameter that we have to estimate.
+
+in the no linkage example, $q = 0$ because we do not estimate any parameters (we do not need to estimate the hypothesised proportions, as all $p_{i} = 0.25$)
+
+the approximation will only be accurate if no expected frequency is too small, as a rule of thumb, all $e_{i} \ge 5$. otherwise, we need to pool adjacent categories so expected frequencies are always more than 5.
+
+## chi-squared goodness of fit test
+
+one categorical variable from a single population and want to see if it follows a hypothesised distribution.
+
+- **hypothesis**: $H_{0}$: the proportions in each category ($p_{i}$) are equal to the corresponding hypothesised proportions meaning they are all the same and the $H_{1}$: at least one proportion is not equal to the hypothesised proportion. at least one equality does not hold.
+- **assumptions**: independent observations and $e_{i} = np_{i0} \ge 5$.
+- **test statistic**:$T=\sum_{i=1}^{k}\frac{(Y_{i}-e_{i})^{2}}{e_{i}}$. under $H_{0}, T~ \chi^{2}_{k-1-q}$ approximately, where $k$ is the number of groups and $q$ is the number of parameters that need to be estimated from the data.
+- **observed test statistic**: $t_{0}=\sum_{i=1}^{k}\frac{(y_{i}-e_{i})^{2}}{e_{i}}$
+- **p-value**: $P(T \ge t_{0}) = P(\chi^{2}_{k-1-q} \ge t_{0})$
+- **decision**: reject $H_{0}$ if the p-value $< \alpha$ otherwise do not reject null.
+
+### finding p-value
+
+we can take a look at finding the p-value in r studio:
+
+```r
+pchisq(18, df = 3, lower.tail = FALSE)
+```
+
+this will output a chisq distribution, labelling where 18 would be on the distribution, and will also return in the console, the area under the curve for x values $\ge$ 18, which would equal about $0.0004$, or $0.04%$.
