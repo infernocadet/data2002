@@ -22,3 +22,17 @@ lets say we have a sample of observations. we want to test whether the sample is
 we want to test whether the sample is taken from a population with a given distribution function $F_{0}(x|\theta_{1}, \theta_{2}, \dots, \theta_{h})$ where $\theta_{l}$ are the parameters of the distribution.
 
 we can summarise the observed data by tabulating the observed frequencies $y_{i}$ for each possible outcome, and compare them to the corresponding expected frequencies $e_{i}$ (expected outcomes if the null was true), calculated using the expected probabilities $p{i}$ from the hypothesised distribution earlier $F_{0}$.
+
+this is a _general_ chi-squared goodness of fit test with test statistic:
+
+$$T = \sum_{i=1}^k \frac{(Y_i - e_i)^2}{e_i} = \sum_{i=1}^k \frac{(Y_i - np_i)^2}{np_i}$$
+
+we just expanded out the $e_{i}$ to $np_{i}$, which is the sample size multiplied by the probability that we get that distinct outcome, $p$.
+
+wrote the rest in my book
+
+## r packages and functions
+
+- `rpois()` generates pseudo-random data from a Poisson distribution
+- `dpois()` probabilities from a Poisson distribution
+- `table` tabulate discrete data
