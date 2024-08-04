@@ -1,0 +1,114 @@
+---
+title: "lab 1 report"
+date: "2024-07-29"
+author: "Marc Caramoan"
+format: 
+  html: 
+    ### IMPORTANT ###
+    embed-resources: true # Creates a single HTML file as output
+    code-fold: show # Code folding; allows you to show/hide code chunks
+    ### USEFUL ###
+    code-tools: true # Includes a menu to download the code file
+    ### OPTIONAL ###
+    code-line-numbers: true # Line numbers in code chunks
+    df-print: paged # Sets how dataframes are automatically printed
+    theme: lux # Controls the font, colours, etc.
+table-of-contents: true # (Useful) Creates a table of contents!
+number-sections: true # (Optional) Puts numbers next to heading/subheadings
+project:
+  output-dir: ~/Desktop/DATA2002/week-01
+---
+
+## Importing Libraries
+
+```{r importing_datasets, tidy = TRUE}
+#| message: False
+#| warning: False
+
+# adding in all the libraries
+library(tidyverse)
+library(palmerpenguins)
+library(stringr)
+library(ggplot2)
+library(plotly)
+```
+
+## Loading in Dataset
+
+```{r}
+penguins = penguins_raw
+glimpse(penguins)
+```
+
+```{r}
+oldnames = colnames(penguins_raw)
+penguins = penguins_raw |>
+  janitor::clean_names()
+glimpse(penguins)
+```
+
+## Plotting
+
+```{r}
+penguins |> 
+  ggplot() + 
+  # add the aesthetics
+  aes(x = body_mass_g, 
+      y = flipper_length_mm,
+      colour = species) +
+  # add a geometry
+  geom_point() + 
+  # tidy up the labels
+  labs(x = "Body mass (g)",
+       y = "Flipper length (mm)",
+       colour = "Species")
+```
+
+Here, we are making it so that the *"Species"* name only shows the first word of the species.
+
+```{r}
+penguins = penguins |>
+  dplyr::mutate(species = stringr::word(species, start = 1, end = 1))
+glimpse(penguins)
+```
+Now we'll try to see the spread of bill depth and length across different species, coloured by sex, and separated by species.
+
+```{r bill_plot, tidy = TRUE}
+#| message: False
+#| warning: False
+
+bill_plot = penguins |>
+  ggplot() +
+  # adding aesthetics
+  aes(x = culmen_length_mm,
+      y = culmen_depth_mm,
+      colour = sex) +
+  # making it a scatterplot
+  geom_point() +
+  # setting up the labels
+  labs(x = "Bill Length (mm)",
+       y = "Bill Depth (mm)",
+       colour = "Sex") +
+  # separating by species
+  facet_wrap(vars(species))
+plotly::ggplotly(bill_plot)
+  
+```
+
+Now we can try to look at this stuff:
+```{r flipper_plot, tidy = TRUE}
+#| message: False
+#| warning: False
+
+flipper_plot = penguins |>
+  ggplot() +
+  aes(x = flipper_length_mm,
+      colour = species) +
+  geom_histogram() +
+  labs(x = "Flipper length (mm)",
+       y = "",
+       colour = "Species") +
+  facet_wrap(vars(species))
+plotly::ggplotly(flipper_plot)
+```
+
