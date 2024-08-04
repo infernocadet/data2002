@@ -136,9 +136,9 @@ one categorical variable from a single population and want to see if it follows 
 
 - **hypothesis**: $H_{0}$: the proportions in each category ($p_{i}$) are equal to the corresponding hypothesised proportions meaning they are all the same and the $H_{1}$: at least one proportion is not equal to the hypothesised proportion. at least one equality does not hold.
 - **assumptions**: independent observations and $e_{i} = np_{i0} \ge 5$.
-- **test statistic**:$T=\sum_{i=1}^{k}\frac{(Y_{i}-e_{i})^{2}}{e_{i}}$. under $H_{0}, T~ \chi^{2}_{k-1-q}$ approximately, where $k$ is the number of groups and $q$ is the number of parameters that need to be estimated from the data.
+- **test statistic**: $$T=\sum_{i=1}^{k}\frac{(Y_{i}-e_{i})^{2}}{e_{i}}$$. under $H_{0}, T~ \chi^{2}_{k-1-q}$ approximately, where $k$ is the number of groups and $q$ is the number of parameters that need to be estimated from the data.
 - **observed test statistic**: $t_{0}=\sum_{i=1}^{k}\frac{(y_{i}-e_{i})^{2}}{e_{i}}$
-- **p-value**: $P(T \ge t_{0}) = P(\chi^{2}_{k-1-q} \ge t_{0})$
+- **p-value**: $$P(T \ge t_{0}) = P(\chi^{2}_{k-1-q} \ge t_{0})$$
 - **decision**: reject $H_{0}$ if the p-value $< \alpha$ otherwise do not reject null.
 
 ### finding p-value
