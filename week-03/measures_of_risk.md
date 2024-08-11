@@ -53,7 +53,7 @@ subpopulation and attribute both mean event. main difference between prospective
 
 ## relative risk
 
-there are different ways to measure the association between a risk factor/treatment and the disease outcome. how the data is **sampled** greatly impacts the ways in which these methods are applicable and interpretable.
+there are different ways to measure the association between a risk factor/treatment and the disease outcome. how the data is **sampled** greatly impacts the ways in which these methods are applicable and interpretable. relative risk just means _"how much more likely are you"_
 
 **relative risk** is defined as the ratio of two conditional probabilities:
 
@@ -71,4 +71,37 @@ as probabilities are bounded between 0 and 1, the relative risk ($RR$) goes to i
 relative risk is approx. 1 when the conditional probabilities are the same.
 
 > [!NOTE]
-> if $D$ and $R$ are **independent**, then the probability of $P(D|R) = P(D)$, and hence $RR=1$.
+> if $`D`$ and $R$ are **independent**, then the probability of $P(D|R) = P(D)$, and hence $RR=1$.
+
+the relative risk is the ratio of the probability of having the disease in the group with the risk factor opposed to the opposite.
+
+- RR = 1 means no difference
+- RR < 1 means disease is less likely to occur with the risk factor
+- RR > 1 means disease is more likely to occur with the risk factor
+
+because of this, we **cannot** calculate relative risk using **retrospective studies**.
+
+## odds ratio
+
+a common alternative to the relative risk is the odds ratio - $OR$.
+
+if the probability of event $A$ is $P(A)$, the odds of event $A$ is defined as
+$$O(A) = P(A)/(1-P(A))$$
+
+in the risk/disease setting, the probability of disease for $R^+$ patients is $P(D^+|R^+)$, and hence the odds are $P(D^+|R^+) / P(D^-|R^+)$
+
+we don't really use the odds just by itself, we want to use the ratio.
+
+so we want to find the odds of a disease for $R^+$ patients as opposed to the odds for $R^-$.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/rr.png" width="350" height="auto">
+</p>
+
+we can see here, that OR can be found from both prospective and retrospective studies.
+
+### interpretation
+
+if $D$ and $R$ are independent then $P(D|R) = P(D)$ and the OR is 1.
+
+it can be shown that OR = 1 if and only if D and R are independent (there is no relationship). large odd ratios (OR > 1) implies increased risk of disease and small odd rations (OR < 1) implies decreased risk of disease.
