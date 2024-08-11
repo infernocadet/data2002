@@ -105,3 +105,64 @@ we can see here, that OR can be found from both prospective and retrospective st
 if $D$ and $R$ are independent then $P(D|R) = P(D)$ and the OR is 1.
 
 it can be shown that OR = 1 if and only if D and R are independent (there is no relationship). large odd ratios (OR > 1) implies increased risk of disease and small odd rations (OR < 1) implies decreased risk of disease.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/asp.png" width="350" height="auto">
+</p>
+
+here, the estimated odds of heart attack for patients taking aspirin is 0.55 times the estimated odds for those taking the placebo.
+
+in populations of low risk / low prevalence, the relative risk and odds ratio will end up being very similar.
+
+## confidence interval
+
+$$\bar{x} = z^* * se(\bar{x})$$
+$$se(\bar{x}) = \frac{\sigma}{\sqrt{n}}$$
+
+this is x bar plus or minus z star times the standard error of x bar, which is equal to the standard deviation divided by the square root of the sample size.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/conf.png" width="350" height="auto">
+</p>
+
+the value of z-star changes based on the confidence interval we want. e.g. for the 95% confidence interval, we have a $\pm 1.96$ z-star value
+
+## standard errors and confidence intervals for odds ratios
+
+### standard errors
+
+the odds ratio estimator $OR$, has a skewed distribution on $(0, \inf)$ with the neutral value being 1.
+
+the **log odds ratio** estimator, $log(OR)$, has a more symmetric distribution centred at 0 if there is no difference between the two groups.
+
+the asymptotic **standard error** for the log odds ratio estimator, $log(\widehat{OR})$:
+$$SE(log(\widehat{OR})) = \sqrt{\frac{1}{a} + \frac{1}{b} + \frac{1}{c} + \frac{1}{d}}$$
+
+### confidence intervals
+
+a large sample 95% confidence interval for log $\theta$ is approx:
+
+$$log(\widehat{OR})\pm 1.96 \times SE(log(\widehat{OR}))$$
+
+exponentiating (taking x and making it the exponent of $e$) the lower and upper ends of the log(OR) confidence interval gives us an approx. confidence interval for the odds-ratio:
+
+$$exp(log(\widehat{OR})\pm 1.96 \times SE(log(\widehat{OR})))$$
+
+> [!TIP]
+> we always use the natural logarithm:
+> $log(a) = ln(a) = log_{e}a$
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/int.png" width="350" height="auto">
+</p>
+
+this confidence interval is a range of plausible values of the population parameter. gives us the range, where we would not reject the null.
+
+we are testing to see if the odds ratio is 1 - i.e., that our groups are independent from each other. that is the null hypothesis. do we reject this, i.e., have sufficient evidence to believe they are not independent from each other, or do we not reject this, is the odds ratio being 1 a plausible value ?
+
+1 is not inside that interval, so we reject the null. it is not in the range of plausible values.
+
+> [!TIP]
+> example:
+> the odds ratio was calculated to be 2.93. the 95% confidence interval for the odds ratio is (1.66, 5.10). what does this mean?
+> the odds of a tonsillectomy patient having Hodgkin's disease are roughly **three times the odds** of a non-tonsillectomy patient having Hodgkin's. this result is **significant** at the 5% level of significance.
