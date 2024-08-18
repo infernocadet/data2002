@@ -95,7 +95,7 @@ we don't really use the odds just by itself, we want to use the ratio.
 so we want to find the odds of a disease for $R^+$ patients as opposed to the odds for $R^-$.
 
 <p align="center">
-    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/rr.png" width="350" height="auto">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/or.png" width="350" height="auto">
 </p>
 
 we can see here, that OR can be found from both prospective and retrospective studies.

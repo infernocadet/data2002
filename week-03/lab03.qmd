@@ -1,0 +1,196 @@
+---
+title: "Lab03"
+date: "20204-08-12"
+author: "Marc Caramoan"
+format: 
+  html: 
+    ### IMPORTANT ###
+    embed-resources: true # Creates a single HTML file as output
+    code-fold: show # Code folding; allows you to show/hide code chunks
+    ### USEFUL ###
+    code-tools: true # Includes a menu to download the code file
+    ### OPTIONAL ###
+    code-line-numbers: true # Line numbers in code chunks
+    df-print: paged # Sets how dataframes are automatically printed
+    theme: lux # Controls the font, colours, etc.
+table-of-contents: true # (Useful) Creates a table of contents!
+number-sections: true # (Optional) Puts numbers next to heading/subheadings
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+## Dishonest Dices
+
+```{r}
+y = c(1, 15, 42, 32, 10) # input the observed counts
+x = 0:4 # define the corresponding groups
+# getting no even on all 4 is (1/2)^4 - getting 1 even is (1/2)^1
+p = dbinom(x, size = 4, prob = 1/2)
+p
+e_y = sum(y) * p
+e_y # looks like all expected values ate greater or equal to 5
+```
+
+then we want to calculate test stat
+
+```{r}
+t0 = sum( (y - e_y)^2/e_y )
+t0
+```
+
+so here we get a t stat of 13.16. now we want to find p value using chisq test
+
+```{r}
+pchisq(t0, df = 4, lower.tail = FALSE) # lower tail is false as we want to find area on lower end
+
+```
+
+so we get 0.0105 as p-value, which is quite small. we should be rejecting the null hypothesis as it is a really small chance to get this value
+
+H_0: y follows a binom distribution with n = 4, p = 1/2
+
+H_1; y does not follow a binom distribution.
+
+t0 = 13.16. p-val = 0.0105199. we reject null as 0.01 \< 0.05
+
+## 3.2 - mammograms
+
+suppose: among 100,000 women with neg mammograms, 20 will have breast cancer. among 100 women with pos mammograms, 10 with have breast cancer. is there a relationship between a pos or neg mamogram and having breast cancer?
+
+```{r}
+x = matrix(c(10, 20, 90, 99980), ncol = 2)
+colnames(x) = c("Breast cancer: yes", "Breast cancer: no")
+rownames(x) = c("Mammogram: positive", "Mammogram: negative")
+x
+a = x[1,1]
+b = x[1,2]
+c = x[2,1]
+d = x[2,2]
+RR = a*(c+d) / (c*(a+b))
+RR
+```
+
+is it appropriate to use a relative risk to quantify the relationship between the risk factor (mammogram result) and disease (breast cancer).
+
+relative risk is equal to the ratio of two conditional probabilities:
+
+$$
+RR = \frac{P(D^+|R^+)}{P(D^+|R^-)}
+$$
+
+here we got 500, which means that we are 500 times more likely to get breast cancer if we test positive for the mammogram compared to if we test negative.
+
+the odds ratio is simple as well:
+
+```{r}
+OR = a*d/(b*c)
+OR
+```
+
+women who test positive has 555 times higher odds to get breast cancer compared to those who test negative
+
+to calculate the confidence interval for odds ratio, we have to find the log odds confidence interval and then exponentiate it.
+
+```{r}
+ORse = sqrt(1/a + 1/b + 1/c + 1/d)
+ORse
+logOR = log(OR, exp(1))
+logOR
+conf_int = c((logOR - 1.96 * ORse), (logOR + 1.96 * ORse))
+conf_int
+conf_int = exp(conf_int)
+conf_int
+```
+
+## 3.3 - soccer goals
+
+```{r}
+goals <- c(
+  1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 2, 2, 4, 0, 10,
+  0, 1, 1, 2, 3, 0, 4, 1, 3, 6, 0, 1, 0, 10, 1,
+  2, 1, 0, 1, 1, 2, 3, 3, 3, 1, 2, 0, 0, 0, 0,
+  1, 1, 1, 1, 1, 2, 0, 1, 0, 2, 2, 0, 1, 2, 1,
+  1, 0, 1, 1, 0, 2, 2, 1, 0, 5, 2, 1, 4, 1, 1,
+  0, 0, 1, 3, 0, 1, 0, 1, 2, 2, 0, 2, 1, 1, 1,
+  0, 1, 0, 1, 2, 1, 2, 0, 2, 1, 0, 1, 5, 2
+)
+n = 104 # number of games
+goal_range = 0:max(goals)
+goal_factor = factor(goals, levels = goal_range)
+goal_occurences = table(goal_factor)
+goal_occurences
+total_goals = sum(goals)
+total_goals
+```
+
+so here, there are 104 games recorded, and there were a total of 146 goals. we can try to visualize this.
+
+```{r}
+# first need to convert table into dataframe for use in ggplot2
+goals_df = goal_occurences |> as.data.frame()
+goals_df |> colnames() = c("Goals", "Frequency")
+
+# then we can plot the histogram
+
+goals_df |> ggplot() + aes(x = Goals, y = Frequency) + geom_bar(stat = "identity") + labs(x = "Number of goals in one game", y = "Frequency") + theme_minimal()
+```
+
+now that we can see what our frequency of goals per game looks like, it easier to think about testing if the number of goals scored per game follows a Poisson distribution.
+
+we would need to first find the probabilities for each outcome under a Poisson distribution, then find the squared differences between the expected number of goals per game and the actual to retrieve our t-stat.
+
+### what is a poisson distribution?
+
+a poisson random variable represents the probability of a given number of events occurring in a fixed interval - if these events occur independently with some known average rate $\lambda$ per unit of time. its probability mass function is:
+
+$$
+P(X=k) = e^-\lambda \frac{\lambda^k}{k!} \text{ for }k=0,1,2 \dots
+$$
+
+now lambda $\lambda$ is also known as the sample mean. the mean we want to find here is the average number of goals per game.
+
+```{r}
+lambda = mean(goals)
+lambda
+```
+
+now we can just simply calculate the probabilities for each number 0 - 10 occuring in a poisson distribution:
+
+```{r}
+poisson_probs = dpois(0:10, lambda)
+
+poisson_probs
+```
+
+now we want to calculate the expected number of games with these goals, given that the total number of games is 104.
+
+```{r}
+expected_goals = poisson_probs * 104
+expected_goals
+
+expected_table = data.frame(
+  Goals = goals_df$Goals,
+  Probability = round(poisson_probs, 5),
+  Expected = round(expected_goals, 5),
+  Actual = goals_df$Frequency
+)
+expected_table
+```
+
+its important to note that an assumption that needs to hold in the hypothesis testing is that our expected values should be over 5. that is, $e_i \ge 5$. we can see that we expected more than 5 games with 4 goals given our sample size. however, we need to combine rows 4 and under into a 4+ row.
+
+```{r}
+exp_combined = expected_table |>
+  mutate(Goals = as.character(Goals)) |>
+  mutate(Goals = ifelse(as.numeric(Goals) >= 4, "4+", Goals)) |>
+  group_by(Goals) |>
+  summarise(
+    Probability = sum(Probability),
+    Expected = sum(Expected),
+    Actual = sum(Actual)
+  ) 
+exp_combined
+```
