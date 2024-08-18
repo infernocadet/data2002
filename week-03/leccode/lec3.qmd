@@ -1,0 +1,382 @@
+---
+title: "Week 3"
+format: 
+  html:
+    code-tools: true
+    embed-resources: true
+bibliography: references.bib
+---
+
+
+```{r}
+library(tidyverse)
+library(janitor)
+```
+
+## Testing for independence
+
+### Case study: Delta vs Omicron
+
+@Marquez2022 looked into the Delta and Omicron variants of COVID-19 in terms of symptoms and rapid test results as well as the vaccination status. Data was collected at a walk-up community testing site in San Francisco.
+
+We're going to look at one specific example, but the authors considered many different combinations of symptoms, vaccination statuses and two different time periods.[^2]
+
+Let's focus on the relationship between fever and vaccination status (unvaccinated vs vaccinated with booster) during the Omicron period (Dec 1 2021 and Jan 30 2022). From Table 3 in @Marquez2022, there were 233 unvaccinated individuals who tested positive between of which 42 reported fever symptoms. In the same period there were 1374 vaccinated with booster people of which 97 reported fever symptoms. The results are summarised in the table below.
+
+```{r}
+#| code-fold: true
+fever = tibble::tribble(
+  ~symptom, ~status, ~count,
+  "Fever", "Unvaccinated", 42,
+  "No fever", "Unvaccinated", 116-42,
+  "Fever", "Vaccinated, Boosted", 97,
+  "No fever", "Vaccinated, Boosted", 432-97
+)
+# Table 3 Fever Boosted vs. Unvaccinated among positives 
+# matrix(c(42, 116-42, 97, 432-97), ncol = 2) |>
+#   chisq.test(simulate.p.value = TRUE)
+fever_tab = fever |> 
+  tidyr::pivot_wider(id_cols = symptom, 
+                     names_from = status, 
+                     values_from = count)
+fever_tab |> gt::gt() |> 
+  gt::cols_label(symptom = "Symptom") |> 
+  gt::tab_spanner(label = "Vaccination status", columns = 2:3)
+```
+
+We can perform a test for independence between fever and vaccination status using the `chisq.test()` function to use the chi-square approximation or the `fisher.test()` function to perform Fisher's exact test.
+
+```{r}
+#| code-fold: true
+fever_chisq = fever_tab |>
+  dplyr::select(-1) |>
+  chisq.test(correct = FALSE)
+fever_chisq
+fever_fisher = fever_tab |>
+  dplyr::select(-1) |>
+  fisher.test()
+fever_fisher
+```
+
+Both approaches give very small p-values indicating that there is strong evidence against the null hypothesis of independence. The chi-square test yields `r insight::format_p(fever_chisq$p.value)` and Fisher's exact test gives `r insight::format_p(fever_fisher$p.value)`. Both approaches are valid (all expected cell counts are greater than 5, so the assumptions underlying the chi-square approximation are be well satisfied) and it's comforting that they come to the same conclusion.
+
+@fig-bar-chart-fever1 and @fig-bar-chart-fever2 visualise the data in two different ways using stacked bar charts. The take home message is similar from both. In @fig-bar-chart-fever1 we can see that patients who experienced fever were less likely to be vaccination than patients who did not experience fever, or equivalently, from @fig-bar-chart-fever2 unvaccinated individuals had higher rates of fever than vaccinated and boosted patients.
+
+::: panel-tabset
+#### Option A
+
+```{r}
+#| label: fig-bar-chart-fever1
+#| fig-cap: "Raw counts and relative proportions of consumers who tested positive to COVID-19 during the Omicron period (Dec 1 2021 and Jan 30 2022) at a community testing site in San Francisco broken down by fever symptom and vaccination status."
+#| code-fold: true
+#| fig-height: 3
+library(ggplot2)
+p_base = fever |> 
+  ggplot() + 
+  aes(y = symptom, x = count, fill = status) + 
+  scale_fill_brewer(palette = "Set1") + 
+  labs(y = "", 
+       x = "Number of patients", 
+       fill = "Vaccination status")
+p1 = p_base + geom_col()
+p2 = p_base + geom_col(position = "fill") + 
+  scale_x_continuous(labels = scales::percent) + 
+  labs(x = "Percentage of patients")
+cowplot::plot_grid(p1, p2, nrow = 2)
+```
+
+#### Option B
+
+```{r}
+#| label: fig-bar-chart-fever2
+#| fig-cap: "Raw counts and relative proportions of consumers who tested positive to COVID-19 during the Omicron period (Dec 1 2021 and Jan 30 2022) at a community testing site in San Francisco broken down by fever symptom and vaccination status."
+#| code-fold: true
+#| fig-height: 3
+library(ggplot2)
+p_base = fever |> 
+  ggplot() + 
+  aes(y = status, x = count, fill = symptom) + 
+  scale_fill_brewer(palette = "Set1") + 
+  labs(y = "", 
+       x = "Number of patients", 
+       fill = "Symptom")
+p1 = p_base + geom_col()
+p2 = p_base + geom_col(position = "fill") + 
+  scale_x_continuous(labels = scales::percent) + 
+  labs(x = "Percentage of patients")
+cowplot::plot_grid(p1, p2, nrow = 2)
+```
+:::
+
+```{r, echo=FALSE}
+# # https://www.medrxiv.org/content/10.1101/2022.05.19.22274968v1.full.pdf
+# cough = tibble::tribble(
+#   ~symptom, ~status, ~count,
+#   "Cough", "Unvaccinated", 71,
+#   "No cough", "Unvaccinated", 116-71,
+#   "Cough", "Vaccinated, Boosted", 268,
+#   "No cough", "Vaccinated, Boosted", 432-268
+# )
+# # all these p-values could also be done as a quiz question,
+# # Fisher's exact?
+# # Table 3 Cough Boosted vs. Unvaccinated among positives 
+# matrix(c(71, 116-71, 268, 432-268), ncol = 2) |> chisq.test(correct = FALSE)
+```
+
+[^2]: There's a tweet summary of the paper [here](https://twitter.com/DataDrivenMD/status/1528825593009041408?s=20&t=KrSBkB-VH3XYUe9n1MDmEQ).
+
+
+### Case study: Gamer spending
+
+The 2022 Deloitte Insights digital media trends survey[^3] reported on a survey of 373 US gamers who attended a live event inside a video game. Participants were asked about their age and whether they made a purchase because of the live event. Overall, 82% of responses made a purchase (either physical merchandise or a digital good). The number of respondees are broken down by purchase outcome and generation in the table below.
+
+Is there any evidence to suggest that there is a relationship between purchasing intention and generation label?
+
+```{r}
+#| code-fold: true
+gamers = tibble::tribble(
+  ~purchase, ~generation, ~count,
+  "Yes", "Generation Z", 60,
+  "No", "Generation Z", 34,
+  "Yes", "Millennials", 203,
+  "No", "Millennials", 28,
+  "Yes", "Generation X", 44,
+  "No", "Generation X", 4
+) |> 
+  dplyr::mutate(
+    generation = factor(generation,
+                        levels = c("Generation Z", 
+                                   "Millennials", 
+                                   "Generation X")
+    )
+  )
+
+gamer_tab = gamers |> 
+  tidyr::pivot_wider(id_cols = purchase,
+                     names_from = generation, 
+                     values_from = count)
+library(gt)
+gamer_tab |> gt() |> 
+  cols_label(
+    purchase = html("Purchase<br>outcome")
+  )
+```
+
+We can use the `chisq.test()` function to perform a test for independence between the generation a person belongs to and their purchasing outcome.
+
+```{r}
+#| code-fold: true
+gamer_chisq = gamer_tab |>
+  dplyr::select(-purchase) |> 
+  chisq.test()
+# check that all the expected cell counts are
+# reasonably large (e.g. larger than 5)
+# gamer_chisq$expected
+gamer_chisq
+```
+
+There is strong evidence, `r insight::format_p(gamer_chisq$p.value)`, to suggest that purchase outcome is not independent of generation. Hence, the age of the attendee is related to their propensity to purchase something. In @fig-bar-chart-gamers we can see that Generation Z are much less likely to purchase merchandise than Millennial or Generation X.
+
+```{r}
+#| label: fig-bar-chart-gamers
+#| fig-cap: "Raw counts and relative proportions of consumers who attended an online live gaming event who made a purchase or not broken down by generation."
+#| code-fold: true
+#| fig-height: 3
+library(ggplot2)
+p_base = gamers |> 
+  ggplot() + 
+  aes(y = generation, x = count, fill = purchase) + 
+  scale_fill_brewer(palette = "Set1")
+p1 = p_base + geom_col() + 
+  labs(y = "", 
+       x = "Number of US gamers", 
+       fill = "Purchase\noutcome")
+p2 = p_base + geom_col(position = "fill") + 
+  scale_x_continuous(labels = scales::percent) + 
+  labs(y = "",
+       x = "Percentage of US gamers", 
+       fill = "Purchase\noutcome")
+cowplot::plot_grid(p1, p2, nrow = 2)
+```
+
+[^3]: Source: [2022 Digital media trends, 16th edition: Toward the metaverse](https://www2.deloitte.com/us/en/insights/industry/technology/digital-media-trends-consumption-habits-survey/summary.html), Accessed: 23 July 2022.
+
+## Testing for homogeneity
+
+Read in the COVID treatment data:
+
+```{r}
+# covid_data = readxl::read_excel("extra/covid_treatment_outcomes.xlsx") |>
+#   janitor::clean_names()
+raw_dat = read_csv("https://raw.githubusercontent.com/DATA2002/data/master/covidplasma.csv")
+dplyr::glimpse(raw_dat)
+```
+
+```{r}
+dat = raw_dat %>% 
+  mutate(subject = as.character(subject)) |> 
+  filter(outcome != "Censored") %>% 
+  mutate(treatment = factor(treatment, levels = c("Plasma", "No plasma")),
+         outcome = factor(outcome, levels = c("Died", "Discharged"))) 
+```
+
+
+```{r}
+covid_tab = table(dat$treatment, dat$outcome)
+covid_tab
+```
+
+
+```{r}
+chisq.test(covid_tab, correct = FALSE)
+```
+
+
+```{r}
+dat |> janitor::tabyl(treatment, outcome) |> chisq.test()
+```
+
+
+```{r}
+y = c(62, 47, 29, 46, 9, 7)
+n = sum(y)
+c = 3
+r = 2
+tab = matrix(y, nrow = r, ncol = c)
+tab
+```
+
+
+```{r}
+# default is to fill by column
+colnames(tab) = c("Approve", 
+                  "Not approve",
+                  "No comment")
+rownames(tab) = c("Labor", "Liberal")
+tab
+```
+
+## Testing in small samples
+
+### Fisher's test
+
+```{r}
+truth = c("milk","tea","tea","milk","tea","tea","milk","milk")
+predicted = c("milk","tea","tea","milk","tea","tea","milk","milk")
+tea_mat = table(truth, predicted)
+tea_mat
+chisq.test(tea_mat, correct = FALSE)
+```
+
+```{r}
+fisher.test(tea_mat)
+fisher.test(tea_mat, alternative = "greater")
+```
+
+### Cancer surgery
+
+```{r}
+y_mat = matrix(c(21, 15, 2, 3), ncol = 2)
+colnames(y_mat) = c("Controlled", "Not controlled")
+rownames(y_mat) = c("Surgery", "Radiation therapy")
+y_mat
+fisher.test(y_mat, alternative = "greater")
+```
+
+### Yates' correction
+
+```{r}
+chisq.test(tea_mat,correct=FALSE)
+chisq.test(tea_mat,correct=TRUE)
+fisher.test(tea_mat)
+```
+
+
+If we wanted to do this manually:
+
+```{r}
+(tea_mat = table(truth, predicted))
+r = c = 2
+yr=apply(tea_mat,1,sum) # Or try rowSums()
+yc=apply(tea_mat,2,sum) # Or try colSums()
+yr.mat=matrix(yr,r,c,byrow = FALSE)
+yc.mat=matrix(yc,r,c,byrow = TRUE)
+# etea_mat = yr%*%t(yc)/n
+(etea_mat=yr.mat*yc.mat/sum(tea_mat))
+(res.yates = (abs(tea_mat-etea_mat)-0.5)^2/etea_mat)
+(t0 = sum(res.yates))
+#Calculate p-values
+pchisq(t0, 1, lower.tail = FALSE)
+```
+
+### Simulation
+
+```{r}
+galton.dat <- matrix(c(5, 4, 1, 12, 42, 14, 2, 15, 10), 3, 3)
+rownames(galton.dat) = c("Arches-B", "Loops-B", "Whorls-B")
+colnames(galton.dat) = c("Arches-A", "Loops-A", "Whorls-A")
+galton.dat
+chisq.test(galton.dat)$expected
+```
+
+
+```{r}
+row_totals = rowSums(galton.dat)
+col_totals = colSums(galton.dat)
+B = 10000
+set.seed(123)
+x_list = r2dtable(n = B,
+                  r = row_totals,
+                  c = col_totals)
+x_list[[1]]
+chisq.test(x_list[[1]])
+```
+
+
+```{r}
+rnd.chisq = numeric(B)
+for (i in 1:B){
+  rnd.chisq[i] = suppressWarnings(chisq.test(x_list[[i]])$statistic)
+}
+sum(rnd.chisq >= 11.1699)/B
+hist(rnd.chisq)
+abline(v = 11.17, col = "purple", lwd = 2)
+axis(1, 11.17, col.axis = "purple")
+```
+
+
+```{r}
+chisq.test(galton.dat, simulate.p.value = TRUE)
+chisq.test(galton.dat, simulate.p.value = TRUE, B = 10000)
+```
+
+## Power!
+
+Say we're trying to test the null hypothesis that births are uniformly distributed across the 4 seasons.
+
+We can generate some data and perform the test:
+
+```{r}
+seasons = c("Summer", "Autumn", "Winter", "Spring")
+x = sample(seasons,
+           prob = c(0.25,0.25,0.25,0.25),
+           size = 100,
+           replace = TRUE)
+xtab = table(x)
+chisq.test(xtab)
+```
+
+What if we generate data where the null hypothesis is false? 
+Do we typically reject the null hypothesis? 
+What about if you increase the sample size?
+
+```{r}
+x = sample(seasons,
+           prob = c(0.2,0.3,0.3,0.2),
+           size = 100,
+           replace = TRUE)
+xtab = table(x)
+chisq.test(xtab)
+```
+
+
