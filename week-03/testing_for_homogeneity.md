@@ -70,3 +70,21 @@ under the null, expected counts are
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/exp.png" width="350" height="auto">
 </p>
+
+## chi-squared test of homogeneity
+
+so we have our actual cell counts, we know what the expected cell counts would be if the null hypothesis were to be true and the proportions are the same across populations.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/br.png" width="350" height="auto">
+</p>
+
+the expected cell counts are:
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/cl.png" width="350" height="auto">
+</p>
+
+> [!IMPORTANT] Workflow
+>
+> - Hypothesis
