@@ -195,4 +195,4 @@ this gives us the monte carlo p-value of 0.022
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/simu.png" width="auto" height="auto">
 </p>
 
-notice that the degrees of freedom are NA because the test statistic is not being compared against any theoretical distribution.
+notice that the degrees of freedom are NA because the test statistic is not being compared against any theoretical distribution. done
