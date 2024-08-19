@@ -1,0 +1,181 @@
+---
+title: "Lab04"
+date: "2024-08-19"
+author: "Marc Caramoan"
+format: 
+  html: 
+    ### IMPORTANT ###
+    embed-resources: true # Creates a single HTML file as output
+    code-fold: show # Code folding; allows you to show/hide code chunks
+    ### USEFUL ###
+    code-tools: true # Includes a menu to download the code file
+    ### OPTIONAL ###
+    code-line-numbers: true # Line numbers in code chunks
+    df-print: paged # Sets how dataframes are automatically printed
+    theme: lux # Controls the font, colours, etc.
+table-of-contents: true # (Useful) Creates a table of contents!
+number-sections: true # (Optional) Puts numbers next to heading/subheadings
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(mosaic)
+```
+
+## 3.1 Personality Type
+
+```{r}
+counts = c(41, 52, 46, 61, 58, 72, 75, 63, 80, 65)
+c_mat = matrix(counts, nrow = 2, byrow = TRUE)
+colnames(c_mat) = c("Open", "Conscientious", "Extrovert", "Agreeable", "Neurotic")
+rownames(c_mat) = c("Business", "Social Science")
+c_mat
+```
+
+Here we want to run a test of homogeneity. We want to make a table of expected cell counts which is equal to row total \* column total / total entries.
+
+```{r}
+chisq.test(c_mat, correct = FALSE)
+```
+
+we want to check if expected values in our cells are greater than or equal to 5 using the expected property.
+
+```{r}
+chisqtest = chisq.test(c_mat)
+chisqtest$expected
+```
+
+Here we have a p-value of 0.56, meaning that we do not have sufficient evidence to reject the null hypothesis, which is that the distribution of personality types across business and social science students are equal.
+
+```{r}
+df = data.frame(counts = counts,
+                major = c(rep("Business", 5), rep("Social Science", 5)),
+                personality = rep(colnames(c_mat), 2))
+df
+```
+
+```{r}
+df |> ggplot() +
+  aes(x = major, y = counts, fill = personality) +
+  geom_col() + 
+  scale_fill_brewer(palette = "Set1")
+  
+```
+
+to get proportion column, use position = fill
+
+```{r}
+df |> ggplot() +
+  aes(x = major, y = counts, fill = personality) +
+  geom_col(position = "fill") + 
+  scale_fill_brewer(palette = "Set1")
+```
+
+so we can see here it looks pretty homogenous.
+
+## 3.2 Shocking
+
+```{r}
+shocking = c(12, 4, 5, 9)
+s_mat = matrix(shocking, nrow = 2)
+colnames(s_mat) = c("Wait together", "Wait alone")
+rownames(s_mat) = c("High anxiety", "Low anxiety")
+s_mat
+```
+
+### Fisher's Exact Test
+
+```{r}
+fisher.test(s_mat)
+```
+
+We do not reject the null hypothesis as $p > 0.05$. There is insufficient evidence to conclude that there is a relationship between anxiety level and the decision to wait together.
+
+Now we want to do it with continuity correction and without
+
+```{r}
+chisq.test(s_mat, correct = TRUE)
+```
+
+Now we want to do it with correct:
+
+```{r}
+chisq.test(s_mat, correct = FALSE)
+```
+
+```{r}
+chisqtest = chisq.test(s_mat)
+chisqtest$expected
+```
+
+```{r}
+chisq.test(s_mat, simulate.p.value = T, B = 20000)
+```
+
+we can calculate the odds ratio
+
+```{r}
+mosaic::oddsRatio(s_mat[c(2,1),], verbose = T)
+```
+
+Given a patient was told "high", the odds of staying together are 5.4 times higher than those who were told "low".
+
+## Asbestos
+
+```{r}
+asbestos = matrix(c(310, 212, 21, 25, 7, 36, 158, 35, 102, 
+                    35, 0, 9, 17, 49, 51, 0, 0, 4, 18, 28), nrow = 5)
+colnames(asbestos) = c("None", "Grade 1", "Grade 2", "Grade 3")
+rownames(asbestos) = c("0-9", "10-19", "20-29", "30-39", "40+")
+y = asbestos |> as.data.frame() |> 
+  tibble::rownames_to_column(var = "years") |> 
+  tidyr::gather(key = grade, value = count, -years)
+y$grade = factor(y$grade, levels = c("None", "Grade 1", "Grade 2", "Grade 3"), ordered = TRUE)
+ggplot(y, aes(x = years, y = count, fill = grade)) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  theme_bw(base_size = 16) + 
+  scale_fill_brewer(palette = "Set1") + 
+  labs(fill = "", y = "Count", x = "Occupational exposure (yrs)")
+```
+
+```{r}
+chisq.test(asbestos)
+```
+
+```{r}
+set.seed(123)
+B = 10000
+row_totals = rowSums(asbestos)
+col_totals = colSums(asbestos)
+x = r2dtable(n = B,
+             r = row_totals,
+             c = col_totals)
+x[[1]]
+chisq.test(x[[1]])
+```
+
+Here, the observed test statistic for the first random sample is 16.141, and p-value is 0.1848
+
+now for each of the 10000 randomly generated contingency tables, we want to record the t stat.
+
+```{r}
+sim_stats = c()
+for (i in 1:B) { # loop over B iterations and each time, save the t stat
+  stat = suppressWarnings(chisq.test(x[[i]])$statistic)
+  sim_stats = c(sim_stats, stat)
+}
+head(sim_stats)
+```
+
+```{r}
+hist(sim_stats)
+```
+
+what prop of time did we observe a test stat as or more extreme than what we observed?
+
+```{r}
+t0 = chisq.test(asbestos)$statisti
+t0
+mean(sim_stats >= t0)
+```
