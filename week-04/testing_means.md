@@ -69,3 +69,96 @@ beer contents:
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/bc.png" width="auto" height="auto">
 </p>
+
+we could also just do this solely in R.
+
+```r
+t.test(x, mu = 375, alternative = "less")
+```
+
+## two sampled t test
+
+if we have two samples, there may be times we want to test if the population means of two samples are different. there are two possible scenarios:
+
+1. two independent samples
+2. two related samples (dependent samples or repeated measures)
+
+> blood samples are taken from 11 smokers and 11 non-smokers to measure aggregation of blood platelets. are these dependent or independent samples?
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/blo.png" width="auto" height="auto">
+</p>
+
+first, we should visualise the data:
+
+```r
+library(ggplot2)
+ggplot(dat) + aes(x = status, y = platelets) +
+    geom_boxplot() +
+    geom_jitter(width = 0.15, size = 3, colour = "blue") +
+    labs(x = "", y = "Blood platelet\naggregation")
+```
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/vis.png" width="auto" height="auto">
+</p>
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/twf.png" width="auto" height="auto">
+</p>
+
+what this workflow means:
+
+- hypotheses: null: mean of u = mean of y. alt: they are not equal, or one is larger / smaller
+- assumptions: samples are _iid_ and they follow a normal distrbution. they are independent. MOREOVER: distributions of both samples must have the same variance, as seen sigma squared is consistent
+- test statistic: given as a formula
+
+we can also do this in R:
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/tsi.png" width="auto" height="auto">
+</p>
+
+## equal variance assumption
+
+we assume that the two underlying normal populations have the same variance. if we actually do look at the standard deviation, they are a little different:
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/smok.png" width="auto" height="auto">
+</p>
+
+do they really have equal underlying population variance? we can use the **welsch test**.
+
+this does not assume equal population variance
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/welsch.png" width="auto" height="auto">
+</p>
+
+to use the welch t-test in R, we just use `t.test()` but don't change the `var.equal` parameter, which is by default set to FALSE.
+
+## paired samples t-test
+
+this is more for a before and after test, where there is some natural link between your observations.
+
+lets take a look at an example of blood samples from 11 individuals before and after they smoked a cigarette.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/cig.png" width="auto" height="auto">
+</p>
+
+we can plot the distribution of our differences and we can see that if there was no difference, the distribution should be centred on zero. doesn't look to be.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/pot.png" width="auto" height="auto">
+</p>
+
+we can put this into R and set the paired = TRUE parameter. OR, we can simply just conduct a regular t test on the differences.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/pte.png" width="auto" height="auto">
+</p>
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/oip.png" width="auto" height="auto">
+</p>
