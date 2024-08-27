@@ -1,0 +1,145 @@
+---
+title: "Lab05"
+date: "2024-08-26"
+author: "Marc Caramoan"
+format: 
+  html: 
+    ### IMPORTANT ###
+    embed-resources: true # Creates a single HTML file as output
+    code-fold: show # Code folding; allows you to show/hide code chunks
+    ### USEFUL ###
+    code-tools: true # Includes a menu to download the code file
+    ### OPTIONAL ###
+    code-line-numbers: true # Line numbers in code chunks
+    df-print: paged # Sets how dataframes are automatically printed
+    theme: lux # Controls the font, colours, etc.
+table-of-contents: true # (Useful) Creates a table of contents!
+number-sections: true # (Optional) Puts numbers next to heading/subheadings
+---
+
+```{r}
+install.packages('pwr')
+library("pwr")
+```
+
+## Power Tests
+
+```{r}
+d = abs(1 - 0) / sqrt(1)
+pwr::pwr.t.test(
+  n = NULL,
+  d = d,
+  sig.level = 0.05,
+  power = 0.9,
+  type = "one.sample",
+  alternative = "greater"
+)
+
+```
+
+## Blood Alcohol Readings
+
+```{r}
+bac = c(12.3,12.7,12.6,13.1,13.2,12.8,13.1,12.9,13.1,12.4,13.6,12.7,12.6,13.1,12.4,12.6,13.3,12.6,12.4,13.1,12.9,12.6,12.7,12.5,12.4,12.4,12.6,12.7,12.4,12.9)
+n = length(bac)
+xbar = mean(bac)
+s = sd(bac)
+c(n, xbar, s)
+```
+
+questions:
+
+let $\mu$ denote the true avg reading that this thing would give on the test sample. this would be 12.6. faulty means its not 12.6
+
+```{r}
+t0 = (xbar - 12.6)/(s/sqrt(n))
+t0
+```
+
+```{r}
+boxplot(bac, ylab = "BAC")
+```
+
+```{r}
+qqnorm(bac)
+qqline(bac)
+```
+
+the points lie close to the qqline and the boxplot shows it is slightly symmetric but not concerning. therefore the normal assumption is approximately satisfied
+
+the critical value at the 5% level of sign. is 2.045. our observed test statistic is 2.644 \> the critical value of 2.045 at the 55% significance level - therefore we reject the null in favour of the alternative hypothesis
+
+## life satisfaction
+
+want to examine differences between older and younger adults on life satisfaction.
+
+```{r}
+Young = c(24, 26, 40, 29, 29, 41, 32, 19, 23, 25, 37, 31, 31, 29, 24, 
+          42, 32, 13, 33, 25, 20, 26, 20, 23, 23, 15, 34, 29, 20, 38)
+Old = c(27, 26, 45, 34, 34, 45, 36, 20, 22, 24, 35, 31, 26, 41, 31, 
+        37, 31, 12, 38, 26, 22, 27, 21, 31, 23, 24, 27, 33, 22, 40)
+```
+
+```{r}
+c(length(Young), length(Old))
+
+```
+
+```{r}
+c(mean(Old), mean(Young), mean(Old-Young))
+```
+
+```{r}
+c(sd(Old), sd(Young), sd(Old-Young))
+```
+
+```{r}
+# tidyverse method
+library("tidyverse")
+dat = tibble(
+  satisfaction = c(Young, Old), 
+  age = c(rep("Young", length(Young)),
+          rep("Old", length(Old)))
+)
+dat |> 
+  group_by(age) |> 
+  summarise(
+    n = n(),
+    mean = mean(satisfaction),
+    sd = sd(satisfaction)
+  )
+```
+
+```{r}
+# some quantiles from distributions
+qt(c(0.025,0.05,0.1),58)
+```
+
+```{r}
+qnorm(c(0.025,0.05,0.1))
+```
+
+```{r}
+qt(c(0.025,0.05,0.1),29)
+```
+
+```{r}
+# Quick visualisation using base R (not ggplot)
+par(mfrow = c(1,2), mar = c(4,5,0.5,0.5))
+boxplot(Young, Old, names = c('Young', 'Old'), ylab = "Life satisfaction")
+boxplot(Old - Young, ylab = 'Difference in life satisfaction\n(Old - Young)')
+```
+
+we use a two sample t-test cos we sampled from two populations, from the young and old populations independently
+
+**Hypothesis**: $H_0$: $\mu_0 = \mu_Y$ vs $H_1$: $\mu_0 \neq \mu_Y$ or $\mu_0 - \mu_Y = 0$
+
+**Assumptions**: Variables are IID, underlying distribution is normal,
+
+$O_i$ are iid, $N(\mu_O, \sigma^2)$
+
+$Y_i$ are iid, $N(\mu_Y, \sigma^2)$
+
+$O_i$ is independent from $Y_i$
+
+Check: the boxplots for young and old look like they have the same size - therefore justifying equal variance assumption. They look slightly symmetric with no significant outliers - therefore justifying normality assumption. Independence doesn't appear to be violated from the way they sampled data.
