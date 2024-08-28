@@ -83,7 +83,9 @@ in most contexts the SE is unknown, but we can also estimate it.
 
 the SE involves the population variance $\sigma^2$ which is usually unknown:
 
-$$SE=\frac{\sigma}{sqrt(n)}$$
+```math
+SE=\frac{\sigma}{sqrt(n)}
+```
 
 we can estimate $\sigma^2$ using the sample variance:
 
