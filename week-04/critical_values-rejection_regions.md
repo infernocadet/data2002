@@ -155,3 +155,117 @@ we want to pick a constant $c$, such that:
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/al.png" width="auto" height="auto">
 </p>
+
+this means that having the difference between the mean and the hypothesised parameter being larger than something times the standard error - meaning we'd reject the null.
+
+### using the t-distribution
+
+basically we know the form of the t-distribution, and we can use this in our alpha formula to find what the best value of $c$ would be.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/tds.png" width="auto" height="auto">
+</p>
+
+### finding quantiles in R
+
+in R, we can get quantiles using a range of functions:
+`qt(p, df = k)`, `qnorm(p)`, `qchisq(p, df = k)` for t, normal, and chisquared distributions.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/qd.png" width="auto" height="auto">
+</p>
+
+heres a cool little drawing explaining something
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/alp.png" width="auto" height="auto">
+</p>
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/qt.png" width="auto" height="auto">
+</p>
+
+looking at our beer example:
+
+- mean was 374.87
+- standard error was 0.12
+- actual discrepancy (xbar - hypothesised mean) was 0.13
+  - now this is only slightly more than 1 (estimated standard error). we'd need it to be at least 2.57 standard errors to reject it at the 5% signficance level.
+
+### coverage probability
+
+for a confidence interval, the coverage probability is the probability that the true value of the unknown parameter "lies inside" (is covered by) the confidence interval.
+
+we choose a (small) non-coverage probability $\alpha$, like 0.05 or 0.01, then the coverage probability is $1-\alpha$.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/10.png" width="auto" height="auto">
+</p>
+
+### using t.test()
+
+we can use the default function:
+
+```r
+t.test(x, mu = 375)
+```
+
+or we can specify the conf level:
+
+```r
+t.test(x, mu = 375, conf.level = 0.99)
+```
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/tes.png" width="auto" height="auto">
+</p>
+
+### one-sided discrepancies of interest
+
+for the t-test apporach, we declare, for some suitable value of $c$, that
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/wut.png" width="auto" height="auto">
+</p>
+
+the discrepancy (sample mean minus pop. mean) is less than some threshold, or the sample mean is less than the population mean minus some constant multipled by the standard error.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/fal.png" width="auto" height="auto">
+</p>
+
+### observed significance level: the p-value
+
+the observed signficance level, or p-value is the value of $\alpha$ for which the observed data is right on the edge. that is, the smallest false alarm rate for which we would "reject" a given hypothesised value, and the non-coverage probability, (1 - confidence level) for which the hypothesised value is on the boundary of the confidence interval
+
+## rejection regions
+
+### rejection rules
+
+to test a hypothesis, we previously defined a decision rule to reject the null.
+
+when the p-value is less than certain fixed preassigned levels, say p-value $ \le \alpha$ where $\alpha = 0.05, 0.10$ etc
+
+we reject or do not reject null according to whether the p-value is less than $\alpha$ or greater than $\alpha$.
+
+alpha is the significance level of the test, which is the boundary between rejecting and not rejecting the null.
+
+formal notation:
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/cv.png" width="auto" height="auto">
+</p>
+
+if we are testing if the actual mean is greater than the hypothesised mean:
+
+- reject null is statistic is bigger than some quantile from a t distribution with n-1 degrees of freedom, or if or t-stat is bigger than abs value of the lower quantile.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/dec.png" width="auto" height="auto">
+</p>
+
+### rejection region for test statistics
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/rrt.png" width="auto" height="auto">
+</p>
