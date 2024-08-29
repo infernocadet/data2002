@@ -141,3 +141,7 @@ lets take a look again
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/pwrt.png" width="auto" height="auto">
 </p>
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/nobs.png" width="auto" height="auto">
+</p>
