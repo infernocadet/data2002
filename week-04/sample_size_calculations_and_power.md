@@ -99,3 +99,45 @@ if we wanted an 80% chance to reject the null hypothesis (and therefore have som
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/dne.png" width="auto" height="auto">
 </p>
+
+### power as a function of n
+
+let us suppose that both the sample mean and sample sd are indicative of the true values of $\mu$ and $\sigma$.
+
+when we increase our sample size, the power of our test becomes larger (remember that power refers to the probability that we reject the null when we ought to, or $\beta$ (chance of not rejecting when we should) becomes smaller - because the standard error is becoming smaller too)
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/pn.png" width="auto" height="auto">
+</p>
+
+## `pwr` in r
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/pwr.png" width="auto" height="auto">
+</p>
+
+`pwr.t.test()` is for sample sample sizes
+
+### cohen's d
+
+rather than specifying a null mean and an alternative mean and standard deviation, the pwr function take a Cohen's d -
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/d.png" width="auto" height="auto">
+</p>
+
+takes the absolute difference between the value under your null hypothesis, and alternative hypothesis and then divides by the standard deviation.
+
+d values of 0.2, 0.5, and 0.8 represent small, medium, and large sizes.
+
+### back to the beer example
+
+lets take a look again
+
+- population sd = 0.294
+- n = 6
+  how much lower than 375 does the actual true population mean $\mu$ need to be for us to be 80% sure of detecting that $\mu \ne 375$ with a two sided test, which has false alarm rate 0.05
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/pwrt.png" width="auto" height="auto">
+</p>
