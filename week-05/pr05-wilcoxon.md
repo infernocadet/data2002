@@ -83,3 +83,5 @@ a bunch of math:
 </p>
 
 so we can standardise this into a normal dist with mean 0 and standard distribution 1.
+
+a bunch of examples in the slides.
