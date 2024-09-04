@@ -1,0 +1,237 @@
+---
+title: "DATA2002 Assignment 1"
+date: "`r Sys.Date()`"
+author: "510435765"
+format: 
+  html: 
+    embed-resources: true # Creates a single HTML file as output
+    code-fold: true # Code folding; allows you to show/hide code chunks
+    code-tools: true # Includes a menu to download the code file 
+    # code-tools are particularly important if you use inline R to 
+    # improve the reproducibility of your report
+    css: html-styles.css # adding in my own css file for styling
+table-of-contents: true # (Optional) Creates a table of contents
+number-sections: true # (Optional) Puts numbers next to heading/subheadings
+bibliography: citations.bib
+---
+
+```{r}
+#| label: loading-libraries
+#| output: FALSE
+library(tidyverse)
+library(janitor)
+library(hms)
+library(ggplot2)
+library(plotly)
+theme_set(theme_bw())
+```
+
+## Introduction
+
+The **2024 Semester 2 DATA2X02** cohort from the University of Sydney @fig-large-building conducted a self-survey, querying a wide range of topics including **target grades**, **age**, **diet**, **commute methods** and **more**, to better understand various aspects of student life and daily habits.
+
+In particular, this report will focus on <mark>analysing student lifestyle choices and their impact on academic performance and well-being</mark>.
+
+::: {.callout-note collapse="true"}
+## What attributes will be examined?
+
+We'll look at:
+
+-   The relationship between sleep consistency and assignment submission preferences
+
+    -   relating to: `sleep_schedule` & `assignments_on_time`
+
+-   A comparison of average WAM between students who are in a relationship or not
+
+    -   relating to: `relationship_status` & `wam`
+
+-   The difference in average weekly paid work hours based on living arrangements
+
+    -   relating to: `weekly_paid_work_hours` & `living_arrangements`
+
+These will be explored more further in the report.
+:::
+
+```{r}
+#| echo: FALSE
+#| label: fig-large-building
+#| fig-cap: "The University of Sydney. Image source: @usydfig"
+knitr::include_graphics("dominic-kurniawan-suryaputra-WyB0JVcteS4-unsplash.jpg")
+```
+
+### Data Overview - Is this truly a "random sample"?
+
+This report does **not analyse a true random sample**.
+
+The total population of the DATA2X02 cohort is $759$ students, $675$ in DATA2002 and $84$ in DATA2902. There were a total of $313$ responses, achieving a $41.2$% response rate. Whilst the survey was sent to the entire population, analysing this sample may still allow for statistical inference assuming that the sample is representative to its population [@martinez].
+
+Although the entire population was queried, students had the choice to participate, meaning those who chose to participate may differ systematically from those who did not - meaning this sample is more likely to be a **voluntary response sample [@voluntary]** where participants may have been students who were more engaged with the coursework or were physically able to complete the survey.
+
+### Potential Biases - Self-Selection & Non-response
+
+Due to this, there are some potential biases:
+
++-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Bias Type               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
++=========================+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================+
+| **Self-Selection Bias** | Students may have chosen to participate in the survey based on interest or characteristics, which is voluntary participation and likely due to the nature of an open survey [@Heckman1990]. This can skew the sample towards students who are more engaged or academically available.                                                                                                                                                                                                                                                                                                                                                                                                                  |
++-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Nonresponse Bias**    | A student may have chosen to NOT respond or complete the survey based on the variables of interest, for example, students with higher anxiety levels and feel tighter on time may be less likely to participate. Students with other commitments or those who feel uncomfortable with the questions may choose to not respond.                                                                                                                                                                                                                                                                                                                                                                         |
++-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Measurement Bias**    | The survey was designed to allow a variety of response types, including categorical choices, numeric ratings, free-text entries and ranges (e.g. from 1 - 10). Rating scale questions which offer a range can be impacted by **central tendency bias**, where respondents naturally avoid extreme ratings or **scale interpretation bias**, where some students might see a "7" as "good" and others might see it as a more average score [@AKBARI2024100042]. Some categorical data may also be limited as categories could be too limited or not capture all possible responses, meaning students may have to choose an inaccurate option or perhaps a more generalised one, leading to skewed data. |
++-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+: Potential Biases {.striped .hover}
+
+### How would this impact some target variables?
+
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Self-Selection Bias**                                                                                                                                         | **Nonresponse Bias**                                                                                                                                        | **Measurement Bias**                                                                                                                                                                              |
++=================================================================================================================================================================+=============================================================================================================================================================+===================================================================================================================================================================================================+
+| `assignments_on_time`: Students with a more eager assessment preference may be more interested in the coursework and choose to participate.                     | `assignments_on_time`: Students with a more reactive assessment preference may be less organised or generally disinterested in the coursework.              | `daily_anxiety_frequency`: Students may tend to remain reserved and tend to pick choices in the middle, due to central tendency bias. There may also be inconsistent interpretation of the scale. |
+|                                                                                                                                                                 |                                                                                                                                                             |                                                                                                                                                                                                   |
+| `wam`: Students with higher WAM results may be more confident or consistent with course engagement and would like to share this result.                         | `living_arrangements`: Students who live in less stable or sensitive living arrangements may be less likely to respond due to higher stress levels or time. | `sleep_schedule`: This may also suffer from central tendency bias or scale interpretation bias, and opinions on how "consistent" one's sleep is may be mixed across the sample.                   |
+|                                                                                                                                                                 |                                                                                                                                                             |                                                                                                                                                                                                   |
+| `target_grade`: Students aiming for higher grades are more likely to be more engaged and motivated in the coursework, and will be more inclined to participate. | `daily_anxiety_frequency`: Students with higher anxiety levels may be less likely to respond due to stress, or if they are not comfortable sharing.         | `social_media`: This question allows for diverse answers with different spelling and alternative names which can lead to data inconsistencies.                                                    |
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+: Impacted Variables {tbl-colwidths="\[33,33,33\]"}
+
+### Could some questions have been improved?
+
+The survey was deliberately designed to allow for flexibility in responses. Whilst response validation could have definitely streamlined the data wrangling process, it is also important that the survey doesn't inherently cause **response bias**, where the option of answers too limited to give an accurate representation of population characteristics.
+
+There were issues with some **open-ended questions without response validation**:
+
+-   What is your WAM?
+
+-   How old are you?
+
+Open-ended questions with free-text responses may not be appropriate for questions in which we can expected a standard response, such as an age or a WAM from 0 - 100. This can lead to inconsistent or non-standardised data, misspellings, unexpected formats or outliers. These questions could have instead validated responses to make sure they were within a reasonable range and were of a numeric type.
+
+There were issues with **potential ambiguity in scale questions**:
+
+-   "How consistent would you rate your sleep schedule?" (1-10)
+
+-   "How often would you say you feel anxious on a daily basis?" (1-10)
+
+Perhaps each score (1-10) could have been labelled with clear descriptions (10: "around the same time every night", 7: "around the same time 4-5 days a week", 5: around the same time 2-3 days a week" etc.
+
+Other questions were inherently ambiguous and **lacked clear instructions**:
+
+-   "How much time do you spend on short video apps every day?"
+
+-   "How tall are you?"
+
+Without validation or instruction, answers can vary widely, and respondents might provide answers in different formats, leading to inconsistent data. To improve data quality and reduce measurement bias, these questions should have clarified expected responses through instructions or response validation.
+
+## Data Wrangling
+
+Calculations in this report were done in `R` [@R], using the `Quarto` environment [@quarto]. This report used base `R` as well as the `tidyverse` package [@tidyverse], `janitor` package @janitor and the `gt` package @gt for data wrangling, and visualisations were produced using `ggplot` through the `tidyverse` package. Further interactive visualisations were produced using the `plotly` package [@plotly].
+
+Initial data cleaning involves cleaning column names, using the same approach as @tarr2024. A separate data-frame only including our variables of interest is then made and missing values are dealt with appropriately.
+
+```{r}
+#| label: loading-data
+#| output: FALSE
+rawData = readxl::read_excel("DATA2x02_survey_2024_Responses.xlsx")
+old_names = colnames(rawData)
+new_names = c(
+  "timestamp",
+  "target_grade",
+  "assignment_preference",
+  "trimester_or_semester",
+  "age",
+  "tendency_yes_or_no",
+  "pay_rent",
+  "urinal_choice",
+  "stall_choice",
+  "weetbix_count",
+  "weekly_food_spend",
+  "living_arrangements",
+  "weekly_alcohol",
+  "believe_in_aliens",
+  "height",
+  "commute",
+  "daily_anxiety_frequency",
+  "weekly_study_hours",
+  "work_status",
+  "social_media",
+  "gender",
+  "average_daily_sleep",
+  "usual_bedtime",
+  "sleep_schedule",
+  "sibling_count",
+  "allergy_count",
+  "diet_style",
+  "random_number",
+  "favourite_number",
+  "favourite_letter",
+  "drivers_license",
+  "relationship_status",
+  "daily_short_video_time",
+  "computer_os",
+  "steak_preference",
+  "dominant_hand",
+  "enrolled_unit",
+  "weekly_exercise_hours",
+  "weekly_paid_work_hours",
+  "assignments_on_time",
+  "used_r_before",
+  "team_role_type",
+  "university_year",
+  "favourite_anime",
+  "fluent_languages",
+  "readable_languages",
+  "country_of_birth",
+  "wam",
+  "shoe_size")
+# overwrite the old names with the new names:
+colnames(rawData) = new_names
+studentData = rawData |>
+  dplyr::select(sleep_schedule, assignments_on_time, wam, relationship_status, living_arrangements,  weekly_paid_work_hours)
+studentData
+```
+
+::: {.callout-note collapse="true"}
+## What data was missing?
+
+At most 2.23% of rows were missing data (7 rows) between `sleep_schedule` and `assignments_on_time`. In this case, removing these rows will not significantly impact our analysis.
+
+At most 14.7% of rows were missing data (46 rows) between `wam` and `relationship_status`. In this case, a very large proportion of missing data came from the `wam` field. After cleaning and ensuring all responses are numeric, any missing values will be dealt with using K-Nearest Neighbours imputation.
+
+At most 8.3% of rows were missing data (26 rows) between `living_arrangements` and `weekly_paid_work_hours`. 7% of weekly hours rows were missing. In this case, it will be sufficient to impute missing weekly hours using the mean weekly hours, and removing any missing living arrangement rows.
+
+```{r}
+#| label: missing-data
+#| output: TRUE
+visdat::vis_miss(studentData) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 0))
+missing1 = (sum(is.na(studentData$sleep_schedule)) + sum(is.na(studentData$assignments_on_time))) / 313
+missing2 = (sum(is.na(studentData$wam)) + sum(is.na(studentData$relationship_status))) / 313
+missing3 = (sum(is.na(studentData$living_arrangements)) + sum(is.na(studentData$weekly_paid_work_hours))) / 313
+print(c(missing1, missing2, missing3))
+```
+:::
+
+::: {.callout-note collapse="true"}
+## How was `sleep_schedule` and `assignments_on_time` cleaned?
+
+Originally, `sleep_schedule` is recorded as a continuous variable on a 1-10 scale, but for testing purposes, these scores will be grouped into categorical bins:
+
+1.  Low Consistency (1-4)
+2.  Medium Consistency (5-7)
+3.  High Consistency (8-10)
+
+```{r}
+#| label: cleaning-sleep
+#| output: FALSE
+print("hello")
+```
+:::
+
+what i am doing
+
+1.  sleep and assignment - chi-square test for independence
+2.  wam and relationship -paired t test maybe idk
+3.  avg weekly paid work hour and living arrangement
