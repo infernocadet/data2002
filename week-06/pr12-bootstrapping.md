@@ -39,3 +39,33 @@ it can be described as a range of plausible vlaues for the population parameter.
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/sumtest.png" width="auto" height="auto">
 </p>
+
+## actual bootstrapping
+
+if our data does not follow a normal distribution, we use bootstrap resampling to empirically model the distribution of the data.
+
+allows us to make inferences about the population where no info is available about that population. we repeatedly resample from our sample (with replacement).
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/bts.png" width="auto" height="auto">
+</p>
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/bci.png" width="auto" height="auto">
+</p>
+
+look theres a whole lecture slide on this (slide 21) but basically we just get the lower 2.5 percentile and upper 2.5 percentile and thats your confidence interval.
+
+this won't give you a symmetric interval btw
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/ubb.png" width="auto" height="auto">
+</p>
+
+want to know why it wasn't symmetric
+
+cos it had outliers. if u delete the outliers the thing is way more symmetric
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/ooooyea.png" width="auto" height="auto">
+</p>
