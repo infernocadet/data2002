@@ -20,17 +20,21 @@ bibliography: citations.bib
 #| output: FALSE
 library(tidyverse)
 library(janitor)
-library(hms)
 library(ggplot2)
-library(plotly)
+library(VIM)
+library(vcd)
+library(knitr)
+library(patchwork)
 theme_set(theme_bw())
 ```
 
 ## Introduction
 
-The **2024 Semester 2 DATA2X02** cohort from the University of Sydney @fig-large-building conducted a self-survey, querying a wide range of topics including **target grades**, **age**, **diet**, **commute methods** and **more**, to better understand various aspects of student life and daily habits.
+The **2024 Semester 2 DATA2X02** cohort from the University of Sydney @fig-large-building conducted a self-survey @DATA2x02_2024, querying a wide range of topics including **target grades**, **age**, **diet**, **commute methods** and **more**, to better understand various aspects of student life and daily habits.
 
-In particular, this report will focus on <mark>analysing student lifestyle choices and their impact on academic performance and well-being</mark>.
+University students commonly face challenges when it comes to balancing studies with personal, social, or work commitments. Understanding the interaction between lifestyle choices and academic performs could potentially provide insights into what behaviours contribute to academic success, and what behaviours contribute to obstacles. Results may not only help university students in optimising study habits but also provide resources for university support services to enhance university life.
+
+In particular, this report will focus on <mark>analysing student lifestyle choices and their impact on academic performance</mark>.
 
 ::: {.callout-note collapse="true"}
 ## What attributes will be examined?
@@ -39,15 +43,15 @@ We'll look at:
 
 -   The relationship between sleep consistency and assignment submission preferences
 
-    -   relating to: `sleep_schedule` & `assignments_on_time`
+    -   relating to: `sleep_schedule` & `assignments_on_time` - using Monte Carlo simulation
 
 -   A comparison of average WAM between students who are in a relationship or not
 
-    -   relating to: `relationship_status` & `wam`
+    -   relating to: `relationship_status` & `wam` - using two sample t-test
 
--   The difference in average weekly paid work hours based on living arrangements
+-   The relationship between employment status and hours spent studying weekly
 
-    -   relating to: `weekly_paid_work_hours` & `living_arrangements`
+    -   relating to: `work_status` & `weekly_study_hours` - using a chi-squared test for independence
 
 These will be explored more further in the report.
 :::
@@ -71,15 +75,15 @@ Although the entire population was queried, students had the choice to participa
 
 Due to this, there are some potential biases:
 
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Bias Type               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-+=========================+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================+
-| **Self-Selection Bias** | Students may have chosen to participate in the survey based on interest or characteristics, which is voluntary participation and likely due to the nature of an open survey [@Heckman1990]. This can skew the sample towards students who are more engaged or academically available.                                                                                                                                                                                                                                                                                                                                                                                                                  |
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Nonresponse Bias**    | A student may have chosen to NOT respond or complete the survey based on the variables of interest, for example, students with higher anxiety levels and feel tighter on time may be less likely to participate. Students with other commitments or those who feel uncomfortable with the questions may choose to not respond.                                                                                                                                                                                                                                                                                                                                                                         |
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Measurement Bias**    | The survey was designed to allow a variety of response types, including categorical choices, numeric ratings, free-text entries and ranges (e.g. from 1 - 10). Rating scale questions which offer a range can be impacted by **central tendency bias**, where respondents naturally avoid extreme ratings or **scale interpretation bias**, where some students might see a "7" as "good" and others might see it as a more average score [@AKBARI2024100042]. Some categorical data may also be limited as categories could be too limited or not capture all possible responses, meaning students may have to choose an inaccurate option or perhaps a more generalised one, leading to skewed data. |
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++-------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----+
+| **Bias Type**           | **Description**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |     |
++-------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----+
+| **Self-Selection Bias** | Students may have chosen to participate in the survey based on interest or characteristics, which is voluntary participation and likely due to the nature of an open survey [@Heckman1990]. This can skew the sample towards students who are more engaged or academically available.                                                                                                                                                                                                                                                                                                                                                                                                                      |     |
++-------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----+
+| **Nonresponse Bias**    | A student may have chosen to NOT respond or complete the survey based on the variables of interest, for example, students with higher anxiety levels and who feel tighter on time may be less likely to participate. Students with other commitments or those who feel uncomfortable with the questions may choose to not respond.                                                                                                                                                                                                                                                                                                                                                                         |     |
++-------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----+
+| **Measurement Bias**    | The survey was designed to allow a variety of response types, including categorical choices, numeric ratings, free-text entries and ranges (e.g. from 1 - 10). Rating scale questions which offer a range can be impacted by **central tendency bias**, where respondents naturally avoid extreme ratings, or **scale interpretation bias**, where some students might see a "7" as "good" and others might see it as a more average score [@AKBARI2024100042]. Some categorical data may also be limited as categories could be too limited or not capture all possible responses, meaning students may have to choose an inaccurate option or perhaps a more generalised one, leading to skewed data. |     |
++-------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----+
 
 : Potential Biases {.striped .hover}
 
@@ -127,7 +131,7 @@ Without validation or instruction, answers can vary widely, and respondents migh
 
 ## Data Wrangling
 
-Calculations in this report were done in `R` [@R], using the `Quarto` environment [@quarto]. This report used base `R` as well as the `tidyverse` package [@tidyverse], `janitor` package @janitor and the `gt` package @gt for data wrangling, and visualisations were produced using `ggplot` through the `tidyverse` package. Further interactive visualisations were produced using the `plotly` package [@plotly].
+Calculations in this report were done in `R` [@R], using the `Quarto` environment [@quarto]. This report used base `R` as well as the `tidyverse` package [@tidyverse], `janitor` package[] @janitor], `visdat` package [@visdat] for data wrangling, and visualisations were produced using `ggplot` through the `tidyverse` package. Tables were produced using `knitr` and `kable` [@knitr].
 
 Initial data cleaning involves cleaning column names, using the same approach as @tarr2024. A separate data-frame only including our variables of interest is then made and missing values are dealt with appropriately.
 
@@ -189,7 +193,7 @@ new_names = c(
 # overwrite the old names with the new names:
 colnames(rawData) = new_names
 studentData = rawData |>
-  dplyr::select(sleep_schedule, assignments_on_time, wam, relationship_status, living_arrangements,  weekly_paid_work_hours)
+  dplyr::select(sleep_schedule, assignments_on_time, wam, relationship_status, work_status,  weekly_study_hours)
 studentData
 ```
 
@@ -200,16 +204,19 @@ At most 2.23% of rows were missing data (7 rows) between `sleep_schedule` and `a
 
 At most 14.7% of rows were missing data (46 rows) between `wam` and `relationship_status`. In this case, a very large proportion of missing data came from the `wam` field. After cleaning and ensuring all responses are numeric, any missing values will be dealt with using K-Nearest Neighbours imputation.
 
-At most 8.3% of rows were missing data (26 rows) between `living_arrangements` and `weekly_paid_work_hours`. 7% of weekly hours rows were missing. In this case, it will be sufficient to impute missing weekly hours using the mean weekly hours, and removing any missing living arrangement rows.
+At most 7.35% of rows were missing data (23 rows) between `work_status` and `weekly_study_hours`. 6% of weekly study hours were missing. In this case, it will be sufficient to impute missing weekly hours using the mean weekly hours, and removing any missing work status rows.
 
 ```{r}
 #| label: missing-data
 #| output: TRUE
 visdat::vis_miss(studentData) +
   theme(axis.text.x = element_text(angle = 90, hjust = 0))
+
+# this is counting the number of rows which are missing data from each field. doesn't matter if they are the same row. just wanted to count them
 missing1 = (sum(is.na(studentData$sleep_schedule)) + sum(is.na(studentData$assignments_on_time))) / 313
 missing2 = (sum(is.na(studentData$wam)) + sum(is.na(studentData$relationship_status))) / 313
-missing3 = (sum(is.na(studentData$living_arrangements)) + sum(is.na(studentData$weekly_paid_work_hours))) / 313
+missing3 = (sum(is.na(studentData$work_status)) + sum(is.na(studentData$weekly_study_hours))) / 313
+
 print(c(missing1, missing2, missing3))
 ```
 :::
@@ -219,19 +226,508 @@ print(c(missing1, missing2, missing3))
 
 Originally, `sleep_schedule` is recorded as a continuous variable on a 1-10 scale, but for testing purposes, these scores will be grouped into categorical bins:
 
-1.  Low Consistency (1-4)
-2.  Medium Consistency (5-7)
-3.  High Consistency (8-10)
+1.  Low (1-4)
+2.  Med (5-7)
+3.  High (8-10)
+
+Students were given concrete responses for `assignments_on_time`, and so an external dataframe will be made taking only the filled in rows for both `sleep_schedule` and `assignments_on_time.`
 
 ```{r}
-#| label: cleaning-sleep
+#| label: aot_df
 #| output: FALSE
-print("hello")
+
+# here i am removing any of those na values (can't mutate categorical) and then placing the values into bins for chi squared testing.
+test1df = studentData |>
+  dplyr::select(sleep_schedule, assignments_on_time) |>
+  dplyr::filter(!is.na(sleep_schedule) & !is.na(assignments_on_time)) |>
+  dplyr::mutate(sleep_consistency = case_when(
+    sleep_schedule >= 1 & sleep_schedule <= 4 ~ "Low",
+    sleep_schedule >= 5 & sleep_schedule <= 7 ~ "Med",
+    sleep_schedule >= 8 & sleep_schedule <= 10 ~ "High",
+    TRUE ~ NA_character_
+  ))
+
+#turning into factor so there is order 
+test1df$sleep_consistency = factor(test1df$sleep_consistency, 
+                                        levels = c("Low", "Med", "High"))
+
+test1df$assignments_on_time = factor(test1df$assignments_on_time, 
+                                          levels = c("Never", "Sometimes", "Usually", "Always"))
+
 ```
 :::
 
-what i am doing
+::: {.callout-note collapse="true"}
+## How was `relationship_status` and `wam` cleaned?
 
-1.  sleep and assignment - chi-square test for independence
-2.  wam and relationship -paired t test maybe idk
-3.  avg weekly paid work hour and living arrangement
+Students were given a free-text option as in addition to selecting a binary "yes" or "no". Those free-text responses were cleaned.
+
+```{r}
+#| label: unique_rs
+unique(sort(studentData$relationship_status))
+```
+
+It was found that there were no non-numeric responses for WAM, just missing values. Assuming a DATA2002 student must have passed prerequisites to take the course, unreasonably low WAM's (less than 25) were ignored. It may be totally possible that a student has a recorded 100 WAM (congratulations to them.) K-Nearest Neighbour imputation was implemented (using the k = 5 nearest neighbours) to preserve any possible associations between `relationship_status` and `wam`, using the `VIM` library [@vim].
+
+```{r}
+#| label: unique_wam
+#| output: FALSE
+unique(sort(studentData$wam))
+```
+
+```{r}
+#| label: rswam_df
+#| output: FALSE
+
+# generalising the answers into Yes and No
+test2df = studentData |>
+  dplyr::select(relationship_status, wam) |>
+  dplyr::mutate(relationship_status = case_when(
+    relationship_status %in% c("Yes", "I have 2", "Multiple") ~ "Yes",
+    relationship_status %in% c("No", "No but I would like to have one, please", "not sure", "Tears") ~ "No",
+    TRUE ~ NA_character_
+  ))
+
+# not counting less than 25 wams
+test2df = test2df |>
+  dplyr::filter(wam >= 25 | is.na(wam))
+
+# using k nearest neighbours for imputation
+test2df = test2df |>
+  VIM::kNN(variable = "wam", k = 5) |>
+  dplyr::filter(!is.na(relationship_status) & !is.na(wam)) |>
+  dplyr::select(relationship_status, wam)
+
+test2df$relationship_status = as.factor(test2df$relationship_status)
+```
+:::
+
+::: {.callout-note collapse="true"}
+## How was `work_status` & `weekly_study_hours` cleaned?
+
+Students were given some concrete answers as well as the ability to give a free-text response. These will be categorised into a binary "Employed" and "Unemployed" status.
+
+```{r}
+#| echo: FALSE
+
+sort(unique(studentData$work_status))
+```
+
+Luckily, all `weekly_study_hours` responses were given as integers or NA values. Outlier responses were removed - there are only 168 hours in a week. There were multiple responses reporting 70 hour study weeks, so there may be slight reason to believe some students really do study that much. Perhaps these respondents included total university time commitment, including classes and travel. We will keep 80 as the highest response. Some students reported very low hours, including 0 and 1. These responses will be kept to preserve interpretation of the question, perhaps these students really don't have time to study at all.
+
+```{r}
+#| echo: FALSE
+
+tail(sort(studentData$weekly_study_hours))
+```
+
+We'll impute missing study hours with the median value across the field after removing outliers. @fig-wsh_hist shows a right-skewed pattern with more concentration towards the left, roughly the 0-20 hour range. The median will be a better measure for central tendency to avoid being influenced by more extreme values. Then any rows which are NA under `work_status` will be removed.
+
+```{r}
+#| output: FALSE
+
+# generalising answers into unemployed or employed.
+test3df = studentData |>
+  dplyr::select(work_status, weekly_study_hours) |>
+  dplyr::mutate(work_status = case_when(
+    is.na(work_status) ~ NA_character_,
+    work_status == "I don't currently work" ~ "Unemployed",
+    TRUE ~ "Employed"
+  )) |>
+  # getting rid of hours more than 80. 80 is already insane
+  dplyr::mutate(weekly_study_hours = ifelse(
+    weekly_study_hours > 80, NA, weekly_study_hours
+  )) 
+
+median_study = median(test3df$weekly_study_hours, na.rm = TRUE)
+
+# imputating missing hours with median
+test3df = test3df |>
+  dplyr::mutate(weekly_study_hours = ifelse(
+    is.na(weekly_study_hours), median_study, weekly_study_hours
+  ))
+```
+
+```{r}
+#| label: fig-wsh_hist
+#| echo: FALSE
+#| warning: FALSE
+
+test3df |>
+  ggplot() +
+  aes(x = weekly_study_hours) + 
+  geom_histogram(
+    binwidth = 5,  
+    fill = "#da627d", 
+    color = "#a53860",  
+    alpha = 0.8  
+  ) +
+  geom_density(
+    aes(y = ..count.. * 5),  
+    color = "#326486",  
+    size = 1  
+  ) +
+  labs(x = "Weekly Study Hours", 
+       y = "Count") +
+  theme_minimal() 
+```
+
+We'll introduce categorical bins for `weekly_study_hours` for the independence test, according to its quartiles.
+
+```{r}
+#| echo: FALSE
+
+summary(test3df$weekly_study_hours)
+```
+
+```{r}
+
+# putting hours into categorical bins
+test3df = test3df |>
+  dplyr::mutate(study_bin = case_when(
+    weekly_study_hours >= 0 & weekly_study_hours < 10 ~ "0-10",
+    weekly_study_hours >= 10 & weekly_study_hours < 20 ~ "10-20",
+    weekly_study_hours >= 20 & weekly_study_hours < 30 ~ "20-30",
+    weekly_study_hours >= 30 ~ "30+",
+    TRUE ~ NA_character_ # catching any na (but there wont be any)
+  )) |>
+  # getting rid of any na values in both fields
+  dplyr::filter(!is.na(work_status) & !is.na(weekly_study_hours) & !is.na(study_bin))
+test3df
+```
+:::
+
+## Results
+
+### Is there an association between a student's sleep consistency and their assignment submission preferences? {#sec-ind}
+
+It can be seen in @fig-stacked-sleep-vs-apref that the proportion of assignment preferences tending to "Always" submitting on time <mark>increases slightly from low to medium to high consistency sleep patterns.</mark> @fig-dist-sleep-schedule shows students rating their sleep to be $7+$ (medium-high) to largely always submitting on time, whereas proportionally higher students with lower sleep consistency scores report only "usually" submitting on time.
+
+This report wants to investigate how structure within one's **sleep schedules** (i.e., having high sleep consistency) relates to their **timeliness and organisation when submitting assessments**, using a chi-square test for independence, later using a Monte-Carlo simulation.
+
+```{r}
+myPalette = c("Never" = "#f9dbbd", "Sometimes" = "#ffa5ab", "Usually" = "#da627d", "Always" = "#a53860")
+
+p1 = test1df |>
+  ggplot() +
+  aes(y = sleep_consistency,
+      fill = assignments_on_time) +
+  geom_bar(position = "fill", orientation = "y") +
+  scale_fill_manual(values = myPalette) + 
+  labs(
+       x = "Proportion",
+       y = "Sleep Consistency",
+       fill = "Assignment Preferences") +
+  theme_minimal()
+
+p2 = test1df |>
+  ggplot() +
+  aes(x = factor(sleep_schedule), fill = assignments_on_time) +
+  geom_bar(position = "dodge") +  
+  scale_fill_manual(values = myPalette) +
+  labs(x = "Sleep Rating",
+       y = "Count",
+       fill = "Assignment Preference") +
+  theme_minimal()
+```
+
+```{r}
+#| label: fig-stacked-sleep-vs-apref
+#| fig-cap: Distribution of Assignment Submission Preferences by Sleep Consistency
+#| echo: FALSE
+p1
+```
+
+```{r}
+#| label: fig-dist-sleep-schedule
+#| fig-cap: Distribution of Assignment Submission Preferences by Sleep Rating (1-10)
+#| echo: FALSE
+p2
+```
+
+```{r}
+#| echo: FALSE
+#| label: fig-cont-t1
+
+cont_t1 = table(test1df$sleep_consistency, test1df$assignments_on_time)
+cont_t1_marg = cont_t1 |>
+  addmargins()
+
+kable(
+  cont_t1,
+  format = "html", 
+  caption = "Sleep Consistency and Assignment Preferences",
+  align = 'c'
+)
+
+```
+
+Let $p_{ij}$ denote the probability of an observation falling in the $(i, j)^{th}$ category and the marginal row and column probabilities are respectively $p_{i \cdot} = \sum_{j=1}^{c} p_{ij} \quad \text{and} \quad p_{\cdot j} = \sum_{i=1}^{r} p_{ij}$. In the general contingency table, let $r$ be the number of rows and $c$ be the number of columns.
+
+1.  **Hypothesis**:
+
+$H_0$: There is no association between **sleep consistency** and **assignment submission preference** (independent). $p_{ij} = p_{i \cdot} p_{\cdot j}, \, i = 1, 2, \ldots, r, \, j = 1, 2, \ldots, c$
+
+$H_1$: There is an association between sleep consistency and assignment submission preference.
+
+2.  **Assumptions**: The data consists of independent observations, and expected cell counts, $e_{ij} = \frac{y_{i \cdot} \cdot y_{\cdot j}}{n} \geq 5.$ @fig-cont-t1 shows that some cells, especially those relating to the "Never" and "Sometimes" columns are less than 5. A **Monte Carlo simulation will be conducted** to create a distribution of test statistics under the null.
+
+3.  **Test statistic**: $T = \sum_{i=1}^r \sum_{j=1}^c \frac{(Y_{ij} - e_{ij})^2}{e_{ij}}. \text{ Under } H_0, \, T \sim \chi^2_{(r-1)(c-1)} \text{ approx,}$ where $r = 3$ and $c = 4$.
+
+4.  **Observed test statistic**: $t_0 = 0.000784$
+
+```{r}
+#| label: t1-ots
+#| output: FALSE
+#| warning: FALSE
+
+obs_stat = chisq.test(cont_t1)$statistic
+obs_stat
+
+```
+
+5.  **P-value**: Normally, $P(T \geq t_0) = P(\chi^2_{6} \geq 0.0007)$. Under Monte Carlo, $P(T \ge t_0) = \frac{\text{Number of simulations} \ge t_0}{10000} < 0.001$ This means that the proportion of simulated test statistics, assuming the null hypothesis to be true, that are as extreme or more extreme than the observed test statistic is less than 1%, shown clearly in @fig-sim-dist.
+
+```{r}
+#| output: FALSE
+#| warning: FALSE
+
+# monte carlo simulation taken from tutorials
+row_totals = rowSums(cont_t1)
+col_totals = colSums(cont_t1)
+B = 10000
+set.seed(123)
+x_list = r2dtable(n = B,
+                  r = row_totals,
+                  c = col_totals)
+rnd.chisq = numeric(B)
+for (i in 1:B){
+  rnd.chisq[i] = chisq.test(x_list[[i]])$statistic
+}
+sum(rnd.chisq >= obs_stat)/B
+```
+
+```{r}
+#| label: fig-sim-dist
+#| fig-cap: Distribution of simulated chi-squared statistics. Purple dashed line shows observed test statistic of 23.037.
+#| echo: FALSE
+
+rnd.chisq_df <- data.frame(rnd.chisq)
+
+ggplot(rnd.chisq_df, aes(x = rnd.chisq)) +
+  geom_histogram(binwidth = 1, fill = "#da627d", color = "white") + 
+  geom_vline(xintercept = obs_stat, color = "#a53860", linetype = "dashed", size = 1) + 
+  labs(
+    x = "Chi-Squared Statistic",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+```
+
+
+6.  **Decision**: Since the p-value calculated from the Monte-Carlo simulation is less than 0.05, **we reject the null hypothesis at the 5% significance level** and conclude that there is a <mark>significant association between sleep consistency and assignment submission preferences.</mark> How consistent a student's sleep schedule is appears to be related to how they prefer to manage assignments.
+
+#### Potential Limitations
+
+A couple factors could have impacted the validity/generalisability of the results.
+
+- **Data Binning**: Originally, `sleep_schedule` was collected on a continuous 1-10 scale, which was grouped into categorical bins (Low, Med, High). This simplifies the data and allows us to conduct the test for independence, however it could lead to a loss of detailed information, e.g. students may have responded quite similarly (like 4 or 5) but were placed into separated bins.
+
+- **Response Bias/Selective responses**: Responses related to the `assignments_on_time` variable may be subject to social conventions - respondents might have selected options they desire (such as picking "Always" instead of "Sometimes", which may be the case for some students), leading to biased estimates. Missing data was also removed, albeit a very small portion (3 rows) there may be a systmatic pattern to missing data.
+
+### Does having a partner negatively impact academic performance?
+
+Commitments outside of coursework may inhibit displace concentrated efforts on academic performance. This report wants to test if the <mark>reported measures of academic performance (WAM) across students identifying as "in a relationship" is significantly lower than students identifying as "single",</mark> i.e., the presence of a partner negatively impacting academic performance.
+
+@fig-wam-relo-graphs shows the distribution between reported WAM across relationship status groups. At face value, there **does not appear to be a substantial difference** in the central tendency of either distribution. Both groups show a similar pattern of distribution with minor differences in the spread of the data, indicating somewhat similar variance. Both groups have minimal yet present outliers.
+
+```{r}
+#| label: fig-wam-relo-graphs
+#| fig-cap: "Distributions of reported WAM by relationship status. **A**: Box plot of distribution. **B**: Violin plot of distribution, showing outliers."
+
+wam_relo_box = ggplot(test2df, aes(x = relationship_status, y = wam, fill = relationship_status)) +
+  geom_boxplot(outlier.shape = NA) +  
+  geom_jitter(width = 0.2, alpha = 0.5, color = "black") +
+  labs(x = "Relationship Status",
+       y = "Weighted Average Mark (WAM)") +
+  scale_fill_manual(values = c("No" = "#a53860", "Yes" = "#326486")) +
+  theme_minimal() +
+  theme(legend.position = "none") 
+
+wam_relo_vio = ggplot(test2df, aes(x = relationship_status, y = wam, fill = relationship_status)) +
+  geom_violin(trim = FALSE, alpha = 0.5) +
+  geom_boxplot(width = 0.1, outlier.color = "red", outlier.shape = 16, outlier.size = 2) + 
+  labs(x = "Relationship Status",
+       y = "Weighted Average Mark (WAM)") +
+  scale_fill_manual(values = c("No" = "#a53860", "Yes" = "#326486")) +
+  theme_minimal() + 
+  theme(legend.position = "none") 
+
+wam_relo_box + wam_relo_vio + plot_annotation(tag_levels = 'A')
+```
+
+```{r}
+#| label: fig-wam_relo_qq
+#| fig-cap: "Quantiles of observed WAM per relationship status against theoretical normal distribution."
+
+wam_relo_qq = ggplot(test2df, aes(sample = wam, color = relationship_status)) + 
+  geom_qq() +
+  geom_qq_line() +
+  scale_color_manual(values = c("No" = "#a53860", "Yes" = "#326486")) + 
+  facet_wrap(~relationship_status, nrow = 1) +
+  labs(x = "Theoretical Quantiles",
+       y = "Sample Quantiles") +
+  theme(legend.position = "none")
+wam_relo_qq
+```
+
+```{r}
+#| label: tbl-wam_sum
+
+wam_relo_sum = test2df |>
+  group_by(relationship_status) |>
+  summarise(
+    n = n(),
+    Mean = mean(wam, na.rm = TRUE) |> signif(2),
+    SD = sd(wam, na.rm = TRUE) |> signif(2)
+  )
+wam_relo_sum |>
+  kable(
+  format = "html", 
+  caption = "WAM summary per relationship status",
+  col.names = c("Relationship Status", "n", "Mean", "SD")
+)
+```
+
+Let $\mu_x$ and $\mu_y$ be the population mean WAM for students who are **taken** (said "Yes") and students who are **single** (said "No").
+
+1.  **Hypothesis**:
+
+$H_0: \mu_x = \mu_y$ - There is no difference in the mean WAM between **taken** and **single** students.
+
+$H_1: \mu_x < \mu_y$ - The mean WAM of taken students is less than the mean WAM of students who are single, indicating that having a partner may negatively impact academic performance.
+
+2.  **Assumptions**: The two populations are normally distributed and have approximately equal variances. @fig-wam-relo-graphs shows approximately equal variances through symmetry between box plots and estimated standard deviations are quite similar in @tbl-wam_sum, and the points in @fig-wam_relo_qq show each observation point being reasonably close to the theoretical normal line.
+
+3.  **Test statistic**: $$
+    T = \frac{\overline{X} - \overline{Y}}{S_p \sqrt{\frac{1}{n_x} + \frac{1}{n_y}}}
+    \text{ where } n_x = 99, n_y = 204\text{ and }
+    S_p^2 = \frac{(n_x - 1) S_x^2 + (n_y - 1) S_y^2}{n_x + n_y - 2}.
+    $$
+
+4.  **Observed test statistic**: $t_0 = -1.018$
+
+```{r}
+#| label: t-stat-wam-relo
+#| output: FALSE
+
+# testing mean of taken vs single wam distributions
+taken_wam = test2df$wam[test2df$relationship_status == "Yes"]
+single_wam = test2df$wam[test2df$relationship_status == "No"]
+
+t.test(taken_wam, single_wam, alternative = "less", var.equal = TRUE)
+```
+
+5.  **P-value**: $P(t_{301} \lt -1.0187) = 0.1546$
+
+6.  **Decision**: Since the p-value is greater than the 0.05 at the 5% significance level, **we do not have sufficient evidence to reject the null hypothesis**. There is <mark>no statistically significant negative impact on the mean WAM</mark> between students who are "taken" and those who are "single" based on current survey data.
+
+#### Potential Limitations
+
+- **Data Cleaning/Imputation**
+  - Originally, `relationship_status` allowed subjectivity and free-text responses. This was categorised into a binary Yes/No, which may be argued that it is not being a true representation of the data.
+  - For `wam`, missing values were imputed using KNN imputation. An assumption of k-nearest neighbours is that the data is missing randomly. If there was systemic pattern to these missing values (e.g. students with lower WAMs may not want to respond) this might lead to potential bias.
+- **Assumptions about normality**
+  - We assume that normality holds for our sample, and also that variances are approximately equal. There was no real statistic test conducted to numerically evaluate this, but rather "eye-balled" through @fig-wam_relo_qq and @tbl-wam_sum. An alternative non-parametric test may be more robust if one were to be concerned about these assumptions.
+
+### Does employment relate to how many hours a student studies each week?
+Balancing external work and university coursework is a common challenge for students undergoing tertiary education. Students may take up employment for degree-related experience, to support their families, or just for extra pocket change. However, this dual commitment may take away from the time students dedicate to their studies. We want to explore whether there is an <mark>association between a student's employment (employed vs unemployed) and their weekly study hours.</mark> @fig-studywork-dodge shows a relatively similar distribution between unemployed and employed students - however @fig-stacked-weeklystudy makes it more obvious that a **higher proportion of students who spend \<20 hours consist of employed students, and a higher proportion of students who spend 20+ hours consist of unemployed students**. This may suggest that employment impacts the amount of time students dedicate to studying.
+
+The data is roughly split in half between unemployed and employed (48.71% and 51.29% respectively.)
+
+```{r}
+#| label: fig-studywork-dodge
+#| fig-cap: "Dodged histogram showing distribution of weekly study hours by work status"
+
+workPalette = c("Unemployed" = "#ffa5ab", "Employed" = "#a53860")
+
+dodger = test3df |>
+  ggplot() +
+  aes(x = weekly_study_hours, fill = work_status) +
+  geom_histogram(position = "dodge", binwidth = 5, alpha = 2, color = "white") + 
+  scale_fill_manual(values = workPalette) +
+  labs(
+    x = "Weekly Study Hours",
+    y = "Count",
+    fill = "Work Status"
+  ) +
+  theme_minimal() 
+dodger
+```
+
+```{r}
+#| label: fig-stacked-weeklystudy
+#| fig-cap: "Stacked bar plot of proportion of weekly study hours by work status."
+
+ggplot(test3df, aes(x = study_bin, fill = work_status)) +
+  geom_bar(position = "fill", color = "white") +  
+  scale_fill_manual(values = workPalette) +
+  labs(
+    x = "Weekly Study Hours",
+    y = "Proportion",
+    fill = "Work Status"
+  ) +
+  theme_minimal() 
+```
+
+```{r}
+#| label: fig-cont-t3
+
+cont_t3 = table(test3df$work_status, test3df$study_bin)
+cont_t3_marg = cont_t3 |>
+  addmargins()
+
+kable(
+  cont_t3,
+  format = "html", 
+  caption = "Work Status and Study Hours",
+  align = 'c'
+)
+```
+
+The following mathematical notation is based off @sec-ind.
+
+1.  **Hypothesis**: $H_0: p_{ij} = p_{i \cdot} p_{\cdot j}, \, i = 1, 2, \ldots, r, \, j = 1, 2, \ldots, c \, \text{vs} \, H_1: \, \text{Not all equalities hold.}$ <mark>$H_0$: There is no association between **work status** and **weekly study hours** (independent). $H_1$: There is an association between **sleep consistency** and **assignment submission preference**. </mark>
+
+2.  **Assumptions**: The data consists of independent observations, and expected cell counts, $e_{ij} = \frac{y_{i \cdot} \cdot y_{\cdot j}}{n} \geq 5.$ @fig-cont-t3 shows that all cell counts meet our requirements. Our categories are mutually exclusive and observations record independent responses.
+
+3.  **Test statistic**: $T = \sum_{i=1}^r \sum_{j=1}^c \frac{(Y_{ij} - e_{ij})^2}{e_{ij}}. \text{ Under } H_0, \, T \sim \chi^2_{(r-1)(c-1)} \text{ approx,}$ where $r = 2$ and $c = 4$.
+
+4.  **Observed test statistic**: $t_0 = 6.896$
+
+5.  **P-value**: $P(T \geq t_0) = P(\chi^2_{3} \geq 6.896) = 0.075$
+
+```{r}
+#| output: FALSE
+# chisq test of independence
+t3_stat = chisq.test(cont_t3)
+t3_stat
+```
+
+6.  **Decision**: The p-value of 0.07528 is greater than 0.05. There is **insufficient evidence to reject the null hypothesis at the 5% level of significance**. We <mark>cannot conclude that there is a significant association</mark> between work status (employed vs unemployed) and weekly hours dedicated to study among DATA2002 students.
+
+#### Potential Limitations
+
+- **Data Cleaning/Imputation**
+  - Originally, there were multiple employment categories, such as "Casual", "Full Time" etc but these were binned into binary "Employed" and "Unemployed" categories. This may also result in the loss of information about the nature of work commitments, and generalises quite a bit. Missing values in `weekly_study_hours` were imputed with the median after removing outliers, and while imputing with the median is robust against outliers, but it also assumes that data is missing at random, and imputation itself may ignore certain study patterns.
+- **Assumptions**
+  - We assumed that all observations are independent - we do not actually know if some students re-submitted the survey, or even if student's may cluster together and study in groups routinely, which creates dependencies especially when it comes to weekly study hours.
+
+## Conclusion
+Through looking at our sample of 41% of the true DATA2X02 cohort, we were able to make a number of conclusions regarding how lifestyle behaviours may relate to academic performance:
+
+1. How consistent a student's sleep schedule is relates to their assignment submission preferences. At face value, we could see that students who stick to a sleep schedule tend to prefer "Always" submitting their assignments on time, a product of timeliness and organisation.
+
+2. That having a partner does NOT negatively impact academic performance. There was insufficient evidence to reject this statement, as groups of single and taken students appeared to have very similar distributions of reported WAM scores.
+
+3. That employment status is NOT related to how many hours studied for university coursework. There was insufficient evidence to disprove independence, however at face value we could see that there was a clearly higher proportion of students studying 20+ hours being unemployed.

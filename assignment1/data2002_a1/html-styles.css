@@ -30,3 +30,8 @@ figcaption {
 .callout-title-container code {
   background-color: rgb(234, 242, 254);
 }
+
+#quarto-appendix.default{
+  background-color: rgb(252, 251, 249); 
+  border-top: 0px;
+}
