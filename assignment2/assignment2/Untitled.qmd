@@ -1,0 +1,91 @@
+---
+title: "EDA"
+format: pdf
+editor: visual
+pdf-engine: pdflatex
+---
+
+```{r}
+library(readr)
+library(tidyverse)
+library(ggplot2)
+library(corrplot)
+```
+
+## Exploratory Data Analysis - Body Fat
+
+This (data set)\[<https://dasl.datadescription.com/datafile/bodyfat>\] lists estimates of the percentage of body fat determined by underwater weighing and various body circumference measurements for 252 men.
+
+Using Siri's equation (1956), we have percent body fat, which is the total volume of fat tissue as a proportion to the combination of lean body tissue and fat tissue. This data set also features measurements of age, weight, height, and the measured circumference of various sections of the body (e.g. neck, chest, thigh etc.)
+
+```{r}
+# loading data
+data = read.table("bodyfat.txt", header = TRUE) # default white space for sep value
+head(data)
+```
+
+```{r}
+colnames(data)
+```
+
+## Analysis
+
+We'll look at the **body fat percentage** (BFP) as the dependent variable that we want to predict and show its relationship against other variables in this dataset. We'll first look at its distribution:
+
+```{r}
+ggplot(data, aes(x = Pct.BF)) +
+  geom_histogram(binwidth = 1.5, fill = "#da627d", color = "white") +
+  labs(x = "Body-fat percentage (%)", y = "Frequency") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(data, aes(x = "", y = Pct.BF)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.25, alpha = 0.72, color = "#da627d") +
+  labs(x = "", y = "BFP %") +
+  theme_minimal()
+```
+
+The data looks mainly normally distributed with some out-liers in the higher body-fat percentage space.
+
+### Against other variables
+
+We can look at the relationship between BFP and things like total weight.
+
+```{r}
+bplot = data |>
+  ggplot() + aes(x = Weight, y = Pct.BF) +
+  geom_point(color = "#ffa5ab") +
+  geom_smooth(method = "lm", color = "#a53860", se = FALSE) +
+  labs(x = "Weight", y = "Body Fat Percentage") +
+  theme_minimal()
+bplot
+```
+
+We can see there is sort of a positive correlation between weight and body fat percentage.
+
+```{r}
+aplot = data |>
+  ggplot() + aes(x = Height, y = Pct.BF) +
+  geom_point(color = "#ffa5ab") +
+  geom_smooth(method = "lm", color = "#a53860", se = FALSE) +
+  labs(x = "Height", y = "Body Fat Percentage") +
+  theme_minimal()
+aplot
+```
+
+We can see there is not really a correlation between height and body fat percentage.
+
+Here we can actually see the correlation between Pct.BF and measurements of chest, thigh and neck.
+
+```{r}
+
+# Compute the correlation matrix
+cor_matrix <- cor(data[, c("Pct.BF", "Chest", "Thigh", "Neck")])
+
+# Plot the correlation heatmap
+par(mar = c(20, 5, 20, 5))  # Adjust margins (bottom, left, top, right)
+corrplot(cor_matrix, method = "color", type = "upper")
+
+```
