@@ -1,0 +1,47 @@
+---
+title: "lab08"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(readr)
+```
+
+## Blonds
+
+```{r}
+pain = read_tsv("https://raw.githubusercontent.com/DATA2002/data/master/blonds.txt")
+glimpse(pain)
+```
+
+```{r}
+# adding levels
+pain = pain |> mutate(
+  HairColour = factor(HairColour, levels = c("LightBlond", "DarkBlond", "LightBrunette", "DarkBrunette"))
+)
+levels(pain$HairColour)
+```
+
+```{r}
+p2 = pain |>
+  ggplot() +
+  aes(x = HairColour, y = Pain) +
+  geom_boxplot() +
+  labs(y = "Pain threshold score", x = "Hair colour")
+p2
+```
+
+```{r}
+ggplot(pain, aes(sample = Pain, colour = HairColour)) +
+  geom_qq() +
+  geom_qq_line() +
+  facet_wrap(~HairColour) + 
+  labs(y = "Pain Threshold Score", x = "Hair Colour")
+```
+
+```{r}
+pain_anova = aov(Pain ~ HairColour, data = pain)
+summary(pain_anova)
+```
