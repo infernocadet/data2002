@@ -60,3 +60,43 @@ given the number of false positives for m tests is $m\alpha$ then consider defin
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/bon.png" width="auto" height="auto">
 </p>
+
+- suppose we do m tests
+- we want to control FWER at level alpha so that P(V>=1) <= alpha
+- we calculate our p values normally
+- then we adjust our alpha, and take p values less than a star
+
+### false discovery rate
+
+aim is to keep the expected proportion of false positives in rejected tests close to alpha
+
+remember false discovery is the proportion of nulls we reject when we weren't meant to reject them out of all the nulls we reject
+
+let R be the total number of H0i rejected (nulls rejected) and V be the number of H01 falsely rejected
+
+FDR = E(V/R)
+
+#### controlling the false discovery rate
+
+- suppose we do m tests and want to control FDR at level alpha
+- calculate p values normally
+- order them from smallest to largest
+- find j\* = max j such that .. just look at the photo bruh
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/fdr.png" width="auto" height="auto">
+</p>
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/bcip.png" width="auto" height="auto">
+</p>
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/gg.png" width="auto" height="auto">
+</p>
+
+but it is actually so easy in r, just use p.adjust.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/wow.png" width="auto" height="auto">
+</p>
