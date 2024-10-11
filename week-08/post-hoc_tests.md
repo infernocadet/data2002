@@ -53,3 +53,31 @@ so rather than looking at a qq plot we can consider the anova residuals (r = yij
 if the anova assumptions hold true, then the residauls should be normally distributed.
 
 so thats why we can pool the residuals, becuase we've sort of normalised the values of yij, because we've subtracted off their mean. so we're only looking at the variances of each observation compared to their groups mean. and that is why we have our big graph of all the residuals of all groups. so now they are all comparable under the assumption of equal variance across all of the populations.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/fa.png" width="auto" height="auto">
+</p>
+
+## gathering summary statistics
+
+if we actually wanted to look at the group means, we'll take our dataframe, group them by category
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/smt.png" width="auto" height="auto">
+</p>
+
+the pull takes out each column and makes it their own vector.
+
+if we actually look at the anova results:
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/e.png" width="auto" height="auto">
+</p>
+
+the p value is less than 0.05 meaning we reject the anova null hypothesis. to check which mean is different - we have to consider all contrasts of interest.
+
+## we look at pairwise contrasts
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/pco.png" width="auto" height="auto">
+</p>
