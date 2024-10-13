@@ -32,10 +32,6 @@ the result is that we have a smaller (and more precise) estimate of the error va
 
 ## two way anova table
 
-<p align="center">
-    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/2a.png" width="auto" height="auto">
-</p>
-
 a two way anova with blocking can be thought of as a generalisation of the paired t-test where each pair is a block
 
 in the paired t test, the idea is to remove the variation between pairs, to more accurately compare the two treatment levels within each pair. the within pair difference is then averaged over all pairs to get the treatment effect.
@@ -51,3 +47,33 @@ under our new parametrisation, each treatment difference, e.g. alpha1 - alpha2 i
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/2b.png" width="auto" height="auto">
 </p>
+
+### individual t-test and confidence interval
+
+assume we are testing with a significance level, alpha.
+
+we estimate the standard error using the residual mean square, and the rest of the slide is here
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/ic.png" width="auto" height="auto">
+</p>
+
+and then for all your pairwise comparisons, just use `emmeans`
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/0.png" width="auto" height="auto">
+</p>
+
+## model checking
+
+it is important to check the assumptions underlying the additive normal model.
+
+- check the normality and constant variance assumption.
+- this is usually done by
+
+  - checking that a box plot or normal q-q plot of residuals looks normal (symmetric, not too many outliers)
+  - plotting residuals against fitted values to check the common variance assumption
+
+    <p align="center">
+      <img src="https://github.com/infernocadet/data2002/blob/main/graphics/mc.png" width="auto" height="auto">
+  </p>
