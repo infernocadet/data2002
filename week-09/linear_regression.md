@@ -199,3 +199,59 @@ to interpret the estimated coefficients - the intercept is the expected value of
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a19.png" width="auto" height="auto">
 </p>
+
+#### nicer model output
+
+we can use `sjPlot` to show a better output as well as the equation
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a20.png" width="auto" height="auto">
+</p>
+
+we could also show the x and y intercept lines.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a21.png" width="auto" height="auto">
+</p>
+
+### slope interpretation
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a22.png" width="auto" height="auto">
+</p>
+
+log can be interpreted as a percentage increase
+
+#### log transformations
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a23.png" width="auto" height="auto">
+</p>
+
+## inference in regression models
+
+we are interested in hypotheses of the form: H0: B1 = 0: B1 != 0 or </>
+
+to do this we use a t-test which follows a t-distribution with degrees of freedom n-2
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a24.png" width="auto" height="auto">
+</p>
+
+calling a summary of the lm object gives us a lot of informaiton
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a25.png" width="auto" height="auto">
+</p>
+
+in this output, the estimate (for the predictor variable) divided by the std. error gives the t value
+
+the p-value as an expression would be
+
+$ 2 \* P(t\_{109} \ge 11.654) $
+
+### workflow
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a26.png" width="auto" height="auto">
+</p>
