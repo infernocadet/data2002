@@ -206,3 +206,23 @@ we determined that there is no interaction between poison and antidote, so we ca
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p18.png" width="auto" height="auto">
 </p>
+
+### pairwise difference t-statistics
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p19.png" width="auto" height="auto">
+</p>
+
+note the interaction term was dropped poison:antidote because it wasn't significant.
+
+you can do bonferroni and stuff on it too.
+
+however when we run bonferroni on both the poison and on the antidote, itll only adjust it for the number of pairwise contrasts between each group. we want to adjust for all the contrasts (for some reason).
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p20.png" width="auto" height="auto">
+</p>
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p21.png" width="auto" height="auto">
+</p>`
