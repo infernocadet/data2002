@@ -23,7 +23,7 @@ assuming each number of levels in i and j are the same.
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/poi.png" width="auto" height="auto">
 </p>
 
-we plot the data and we want to get the interaction between each poison and antidode using the interaction() function - which is the same thing as grouping by antidote
+we plot the data and we want to get the interaction between each poison and antidote using the interaction() function - which is the same thing as grouping by antidote
 
 ## paper planes
 
@@ -130,4 +130,79 @@ this factor indicates that the 12 groups in the big 1 way anova with 4 observati
 
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p10.png" width="auto" height="auto">
+</p>
+
+we could put this in a big 1 way anova and this gives us a highly significant result, indicating that there is a signficant difference in the means with at least 1 of the combinations of poison and antidote
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p11.png" width="auto" height="auto">
+</p>
+
+but a better approach would be to break it down into the two main effects and then the interaction effect
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p12.png" width="auto" height="auto">
+</p>
+
+so we model our dependent variable inv_survival against poison mean effect + antidote mean effect + the interaction between poison and antidote.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p13.png" width="auto" height="auto">
+</p>
+
+again the F-value is calculated by taking the mean square of the poison:antidote and dividing by the residual mean square - which follows an f-distribution with 6 and 36 degrees of freedom, giving us an p valu eof 0.387.
+
+there is no signficiant difference - we would not reject the null hypothesis that the alpha gamma i j are all jointly equal to 0.
+
+we can actually see however, that the poison and antidote main effects are significant, there is a significant difference between the levels of each treatment group.
+
+## interaction plots
+
+we can visualise the interactions between the levels of factor a and the levels of factor b
+
+we take the mean of each treatment combination and plot those means on a scatter plot.
+
+if there is no interaction, the traces should be roughly parallel. if there is an interaction, the traces may cross or deviate from parallelism in some other way.
+
+pretty easy - just calculate the mean for each treatment group:
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p14.png" width="auto" height="auto">
+</p>
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p15.png" width="auto" height="auto">
+</p>
+
+so this shows the mean survival time for observations with poison and antidote combination.
+
+they do look pretty parallel, and that aligns with our decision to not reject the null hypothesis that there is no interaction between poison and antidote.
+
+we can do it with `emmans::emmip`, we feed it our anova object and then we can denote what we want to plot
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p16.png" width="auto" height="auto">
+</p>
+
+on the other hand, with the paper planes, we found that there was some sort of interaction. so the interaction plots actually look like this
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p17.png" width="auto" height="auto">
+</p>
+
+## post-hoc tests
+
+if we reject the null hypothesis, we want to see what leads to the significance. however, in the two-factor scenario, exactly which comparisons one might be interested in may depend on whether there was a significant interaction or not. if there is a significant interaction, we might like to know if one factor has a strong effect of the other factor within some or all of its levels.
+
+if there is no significant interaction, levels of factor A can be compared independently of levels of factor B.
+
+- which levels of factor A are significantly different from one another or
+- which levels of factor B are signficiantly different from the other
+
+### comparing poisons
+
+we determined that there is no interaction between poison and antidote, so we can go ahead and compare different poisons to each other and compare antidote treatments to each other.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p18.png" width="auto" height="auto">
 </p>
