@@ -101,3 +101,33 @@ H0: (ay)ij = 0 for all i, j
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p6.png" width="auto" height="auto">
 </p>
+
+### f-test for no interaction
+
+brooo seriously this is cooked
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p7.png" width="auto" height="auto">
+</p>
+
+so here is the actual score. I am sure that R will save us today
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p8.png" width="auto" height="auto">
+</p>
+
+## going back to our examples
+
+poison has 3 levels (I, II, III) and antidote has 4 levels (a, b, c, d)
+
+we can make a new variable which is a level for each treatment combination
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p9.png" width="auto" height="auto">
+</p>
+
+this factor indicates that the 12 groups in the big 1 way anova with 4 observations each
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/p10.png" width="auto" height="auto">
+</p>
