@@ -255,3 +255,35 @@ $ 2 \* P(t\_{109} \ge 11.654) $
 <p align="center">
     <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a26.png" width="auto" height="auto">
 </p>
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a27.png" width="auto" height="auto">
+</p>
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a28.png" width="auto" height="auto">
+</p>
+
+### decomposing the error and $R^2$
+
+the coefficient of determination (square of the correlation coefficient) $r^2$ measures the proportion of total variation in Y explained by the linear regression model.
+
+it measures the strength of the linear relatonship between x and y by the percentage of variation in y explained by the linear regression model in x. this is output in the summary of the lm object.
+
+e.g. we can say that temperature explains 55% of the observed variation in the logarithm of ozone concentration.
+
+## multiple regression
+
+easy to add other predictors
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a29.png" width="auto" height="auto">
+</p>
+
+### interpretation
+
+the estimated coefficients are now interpreted as conditional on the other variables, each Bi reflects the predicted change in y associated with a one unit increase in xi, holding the other variables constant
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/a30.png" width="auto" height="auto">
+</p>
