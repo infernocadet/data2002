@@ -131,3 +131,37 @@ we can break it down by class (categorical variable), we can see that there is a
 </p>
 
 if we run a linear regression vs anova, we get similar yet slightly different results
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/b10.png" width="auto" height="auto">
+</p>
+
+so we get a bunch of different beta variables here. compared to anova
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/b11.png" width="auto" height="auto">
+</p>
+
+we have 6 degrees of freedom on the class variable, and an f-value of 45.1 on an f-distribution with 6 and 227 degrees of freedom, which corresponds to a really small pvalue.
+
+if we use the emmeans() package as well, feeding it the linear model and specifying to break down by class:
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/b12.png" width="auto" height="auto">
+</p>
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/b13.png" width="auto" height="auto">
+</p>
+
+we can actually see that our intercept became the first (alphabetically) ranked class.
+
+### assumption checking
+
+if we only have categorical variables in the model, it is easy to check assumptions in the same way as ANOVA.
+
+<p align="center">
+    <img src="https://github.com/infernocadet/data2002/blob/main/graphics/b14.png" width="auto" height="auto">
+</p>
+
+we dont really care about linearity - linearity is when we have two or more continuous/numerical predictors and were looking at how a unit change in one of the predictors impact the actual output - the coefficients in this case are not going to be interpreted in that way - they are either 1 or 0 - a dummy variable.
